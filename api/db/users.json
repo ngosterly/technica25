@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "id": "user_001",
+      "email": "alice@example.com",
+      "username": "alice_wonderland",
+      "password": "hashed_password_123",
+      "createdAt": "2025-01-15T10:30:00Z",
+      "settings": {
+        "disorders": ["anxiety", "adhd"],
+        "avoidTopics": ["failure", "bad choice", "wrong decision", "mistake"],
+        "preferredCategories": [
+          "Regret Likelihood",
+          "Reversibility Score",
+          "Impact on Sleep",
+          "Impact on Anxiety",
+          "Potential for Overstimulation"
+        ],
+        "notifications": true,
+        "theme": "light"
+      }
+    },
+    {
+      "id": "user_002",
+      "email": "bob@example.com",
+      "username": "bob_builder",
+      "password": "hashed_password_456",
+      "createdAt": "2025-02-20T14:15:00Z",
+      "settings": {
+        "disorders": ["depression"],
+        "avoidTopics": ["failure", "giving up"],
+        "preferredCategories": [
+          "Regret Likelihood",
+          "Impact on Mental Health",
+          "Energy Level Required"
+        ],
+        "notifications": false,
+        "theme": "dark"
+      }
+    },
+    {
+      "id": "user_003",
+      "email": "charlie@example.com",
+      "username": "charlie_brown",
+      "password": "hashed_password_789",
+      "createdAt": "2025-03-10T09:00:00Z",
+      "settings": {
+        "disorders": [],
+        "avoidTopics": [],
+        "preferredCategories": [
+          "Regret Likelihood",
+          "Reversibility Score"
+        ],
+        "notifications": true,
+        "theme": "light"
+      }
+    }
+  ]
+}
