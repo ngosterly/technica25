@@ -1,2 +1,3 @@
 # technica25
-Git Test
+Git Testx
+- [ ] personality/emotion music reccommender
