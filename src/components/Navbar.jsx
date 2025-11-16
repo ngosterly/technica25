@@ -61,6 +61,12 @@ const Navbar = () => {
               </Link>
             )}
           </li>
+
+          <li className="auth">
+            <Link to="/auth" className={isActive('/auth')}>
+              Login
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

@@ -1,0 +1,245 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    /* Placeholder background - replace with your image texture */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* To use image texture, uncomment and replace:
+    background-image: url('path/to/your/background-texture.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.auth-box {
+    /* Placeholder background - replace with your image texture */
+    background: rgba(255, 255, 255, 0.95);
+    /* To use image texture, uncomment and replace:
+    background-image: url('path/to/your/card-texture.jpg');
+    background-size: cover;
+    background-position: center;
+    */
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-placeholder {
+    /* Placeholder - replace with actual logo image */
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    background: #667eea;
+    /* To use logo image, uncomment and replace:
+    background-image: url('path/to/your/logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.form-container {
+    display: none;
+}
+
+.form-container.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 28px;
+    text-align: center;
+}
+
+.subtitle {
+    color: #666;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    /* Placeholder background - can be replaced with subtle texture */
+    background: white;
+    /* To use input texture, uncomment and replace:
+    background-image: url('path/to/your/input-texture.png');
+    background-size: cover;
+    */
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-primary {
+    /* Placeholder background - replace with your button texture */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* To use button texture, uncomment and replace:
+    background-image: url('path/to/your/button-texture.jpg');
+    background-size: cover;
+    */
+    color: white;
+    margin-bottom: 20px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #999;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.divider span {
+    padding: 0 15px;
+    font-size: 13px;
+}
+
+.btn-google {
+    /* Placeholder background - replace with your google button texture */
+    background: white;
+    /* To use button texture, uncomment and replace:
+    background-image: url('path/to/your/google-button-texture.jpg');
+    background-size: cover;
+    */
+    color: #333;
+    border: 2px solid #e0e0e0;
+    margin-bottom: 25px;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+    border-color: #d0d0d0;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    /* Placeholder - replace with Google icon image */
+    background: #EA4335;
+    /* To use Google icon, uncomment and replace:
+    background-image: url('path/to/your/google-icon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    */
+    border-radius: 2px;
+}
+
+.switch-form {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.switch-form a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.switch-form a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .auth-box {
+        padding: 30px 25px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
