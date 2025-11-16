@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./DecisionPage.css";
+import { askGemini } from "../../api/gemini";
 
 const STEPS = {
   ASK_QUESTION: "ask_question",
@@ -29,80 +30,82 @@ export default function DecisionPage() {
   const [ratings, setRatings] = useState({});
   const [isTyping, setIsTyping] = useState(false);
 
-  const [includeJournal, setIncludeJournal] = useState(false);
-
-  // Hardcoded options for now
+  // TEMP: hardcoded options
   const [options] = useState(["Scotland", "Korea"]);
 
   /* -------------------------------------------------------
-      BOT RESPONSE WITH TYPING ANIMATION
+        SEND BUTTON HANDLER
   -------------------------------------------------------*/
-  function botRespond(text, delay = 3000) {
+  const handleSend = async () => {
+  if (!input.trim()) return;
+
+  if (step === STEPS.ASK_QUESTION) {
+    const userText = input.trim();
+
+    // Add user message
+    setMessages((prev) => [
+      ...prev,
+      { id: prev.length + 1, type: "user", text: userText },
+    ]);
+
+    setDecision(userText);
+    setInput("");
     setIsTyping(true);
+    setStep(null);
+
+    let aiCategories = [];
+    let suggestedCategories = [];
+
+    try {
+      aiCategories = await askGemini(userText);
+      console.log("🔥 AI returned categories:", aiCategories);
+
+      if (Array.isArray(aiCategories) && aiCategories.length > 0) {
+        suggestedCategories = Array.from(
+          new Set(
+            aiCategories
+              .map((c) => String(c).trim())
+              .filter((c) => c.length > 0)
+          )
+        );
+      }
+
+      // LOG BEFORE FALLBACK
+      console.log("🔍 BEFORE FALLBACK — Suggested:", suggestedCategories);
+      console.log("🔍 BEFORE FALLBACK — Raw AI:", aiCategories);
+
+    } catch (err) {
+      console.error("AI extraction failed:", err);
+    }
+
+    // Fallback default categories only if necessary
+    if (suggestedCategories.length === 0) {
+      console.warn("⚠ AI returned no usable categories — using defaults");
+      suggestedCategories = ["Cost", "Time", "Culture", "Safety", "Weather"];
+    }
 
     setTimeout(() => {
       setIsTyping(false);
+
       setMessages((prev) => [
         ...prev,
-        { id: prev.length + 1, type: "bot", text },
+        {
+          id: prev.length + 1,
+          type: "bot",
+          text:
+            "Thanks for sharing that. Based on your decision, here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'",
+        },
       ]);
-    }, delay);
+
+      setCategories(suggestedCategories);
+      setStep(STEPS.EDIT_CATEGORIES);
+    }, 1500);
   }
+};
+
 
   /* -------------------------------------------------------
-     SEND BUTTON HANDLER (only active in ASK_QUESTION)
-  -------------------------------------------------------*/
-  const handleSend = () => {
-    if (!input.trim()) return;
-
-    if (step === STEPS.ASK_QUESTION) {
-      const userMessage = {
-        id: messages.length + 1,
-        type: "user",
-        text: input,
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-      setDecision(input);
-      setInput("");
-
-      const suggested = ["Cost", "Time", "Culture", "Safety", "Weather"];
-
-      // Show bot typing bubble first
-      setIsTyping(true);
-
-      setIsTyping(true);    
-      setStep(null); // temporarily hide UI
-
-      setTimeout(() => {
-        setIsTyping(false);
-
-        setMessages(prev => [
-          ...prev,
-          {
-            id: prev.length + 1,
-            type: "bot",
-            text:
-              "Thanks for sharing that. Based on your decision, here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'"
-          }
-        ]);
-
-        setCategories([
-          "Cost",
-          "Time",
-          "Culture",
-          "Safety",
-          "Weather",
-        ]);
-
-        setStep(STEPS.EDIT_CATEGORIES);
-      }, 3000);  // <-- typing delay
-
-    }
-  };
-
-  /* -------------------------------------------------------
-     CATEGORY EDITING STEP
+        CATEGORY EDITING STEP
   -------------------------------------------------------*/
   const renderCategoryEditor = () => (
     <div className="chat-section-bubble">
@@ -146,16 +149,21 @@ export default function DecisionPage() {
         className="primary-button"
         onClick={() => {
           setIsTyping(true);
-          setStep(null); // temporarily hide next UI
+          setStep(null);
 
           setTimeout(() => {
             setIsTyping(false);
-            setMessages(prev => [
+            setMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, type: "bot", text: "Great! Now tell me how important each category is to you on a scale from 1 to 5." }
+              {
+                id: prev.length + 1,
+                type: "bot",
+                text:
+                  "Great! Now tell me how important each category is to you on a scale of 1–5.",
+              },
             ]);
             setStep(STEPS.SET_WEIGHTS);
-          }, 3000);
+          }, 1500);
         }}
       >
         Ready to continue
@@ -164,13 +172,12 @@ export default function DecisionPage() {
   );
 
   /* -------------------------------------------------------
-     CATEGORY IMPORTANCE SLIDERS (1–5)
+        CATEGORY WEIGHTS
   -------------------------------------------------------*/
   const renderWeightsStep = () => (
     <div className="chat-section-bubble">
       <h3>How important is each category?</h3>
-
-      <p className="helper-text">Rate importance from 1–5</p>
+      <p className="helper-text">Slide from 1–5</p>
 
       <div className="weights-grid">
         {categories.map((cat) => {
@@ -212,12 +219,17 @@ export default function DecisionPage() {
 
           setTimeout(() => {
             setIsTyping(false);
-            setMessages(prev => [
+            setMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, type: "bot", text: "Perfect. Next, we'll compare your options in each category." }
+              {
+                id: prev.length + 1,
+                type: "bot",
+                text:
+                  "Great! Now rate each option in every category.",
+              },
             ]);
             setStep(STEPS.RATE_OPTIONS);
-          }, 3000);
+          }, 1500);
         }}
       >
         Ready to continue
@@ -226,7 +238,7 @@ export default function DecisionPage() {
   );
 
   /* -------------------------------------------------------
-     RATE OPTIONS (1–5 sliders)
+        RATE OPTIONS
   -------------------------------------------------------*/
   const renderRatingsStep = () => (
     <div className="chat-section-bubble">
@@ -285,14 +297,17 @@ export default function DecisionPage() {
 
           setTimeout(() => {
             setIsTyping(false);
-            setMessages(prev => [
+            setMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, type: "bot", text: "Great! Let me calculate which option is best for you..." }
+              {
+                id: prev.length + 1,
+                type: "bot",
+                text: "Great! Let me calculate your best option...",
+              },
             ]);
             setStep(STEPS.SHOW_RESULT);
-          }, 3000);
+          }, 1500);
         }}
-
       >
         Ready to continue
       </button>
@@ -300,7 +315,7 @@ export default function DecisionPage() {
   );
 
   /* -------------------------------------------------------
-     RESULTS
+        RESULTS
   -------------------------------------------------------*/
   const calculateResults = () => {
     const optionScores = {};
@@ -311,6 +326,7 @@ export default function DecisionPage() {
       categories.forEach((cat) => {
         const weight = weights[cat] ?? 0;
         const rating = ratings[cat]?.[opt] ?? 0;
+
         total += weight * rating;
       });
 
@@ -325,43 +341,27 @@ export default function DecisionPage() {
     const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
     const [bestOption, bestScore] = sorted[0];
-    const [secondOption, secondScore] = sorted[1];
 
     return (
       <div className="chat-section-bubble">
-        <h3>The Best Option</h3>
+        <h3>Your Best Option</h3>
 
-        <p>Based on your priorities and ratings, the better choice is:</p>
+        <p>Based on your ratings and category importance, the better choice is:</p>
 
         <div className="best-result-box">
           <strong>{bestOption}</strong>
           <span className="score-tag">{bestScore.toFixed(1)}</span>
         </div>
 
-        <p style={{ marginTop: "1rem" }}>
-          Here’s how the final scores compared:
-        </p>
-
-        <div className="scores-list">
-          <div className="score-row">
-            <span>{bestOption}</span>
-            <span>{bestScore.toFixed(1)}</span>
-          </div>
-          <div className="score-row">
-            <span>{secondOption}</span>
-            <span>{secondScore.toFixed(1)}</span>
-          </div>
-        </div>
-
         <p className="helper-text" style={{ marginTop: "1rem" }}>
-          This score represents (importance × rating) summed across all categories.
+          Score = (importance × rating) summed across all categories.
         </p>
       </div>
     );
   };
 
   /* -------------------------------------------------------
-     MAIN JSX
+        MAIN JSX
   -------------------------------------------------------*/
   return (
     <div className="chatbot-page">
@@ -372,7 +372,6 @@ export default function DecisionPage() {
         </div>
 
         <div className="messages-container">
-          {/* Typing bubble always appears at bottom */}
           {messages.map((msg) => (
             <div key={msg.id} className={`message ${msg.type}`}>
               <div className="message-bubble">{msg.text}</div>
@@ -393,7 +392,6 @@ export default function DecisionPage() {
           {step === STEPS.SHOW_RESULT && renderResults()}
         </div>
 
-        {/* Input bar only visible during step 1 */}
         {step === STEPS.ASK_QUESTION && (
           <div className="input-container">
             <input
@@ -404,7 +402,6 @@ export default function DecisionPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-
             <button className="send-button" onClick={handleSend}>
               Send
             </button>
@@ -414,6 +411,7 @@ export default function DecisionPage() {
     </div>
   );
 }
+
 
 
 
