@@ -1,23 +1,18 @@
 export async function askGemini(prompt) {
   try {
+    console.log("🤖 Sending prompt to AI:", prompt);
+
     // Enhanced prompt to extract both options and categories
-    const enhancedPrompt = `Based on this decision question: "${prompt}"
+    const enhancedPrompt = `Analyze this decision question and extract the two options being compared and suggest relevant categories.
 
-Please identify:
-1. The TWO options being compared (extract them from the question)
-2. Relevant decision-making categories to evaluate these options
+Question: "${prompt}"
 
-Return ONLY a JSON object in this exact format:
-{
-  "options": ["Option 1", "Option 2"],
-  "categories": ["Category 1", "Category 2", "Category 3", "Category 4", "Category 5"]
-}
+Respond with ONLY a valid JSON object (no markdown, no code blocks) in exactly this format:
+{"options": ["Option A", "Option B"], "categories": ["Category1", "Category2", "Category3", "Category4", "Category5"]}
 
 Example:
-Question: "Should I study abroad in Scotland or Korea?"
-Response: {"options": ["Scotland", "Korea"], "categories": ["Cost", "Culture", "Language Barrier", "Career Opportunities", "Weather"]}
-
-Return ONLY the JSON object, no other text.`;
+Question: "Should I buy a house or rent an apartment?"
+Response: {"options": ["Buy a house", "Rent an apartment"], "categories": ["Cost", "Flexibility", "Long-term Investment", "Maintenance", "Location"]}`;
 
     const res = await fetch("https://decisionera-ai.laylaaphipps.workers.dev/", {
       method: "POST",
@@ -25,21 +20,30 @@ Return ONLY the JSON object, no other text.`;
       body: JSON.stringify({ prompt: enhancedPrompt }),
     });
 
+    if (!res.ok) {
+      console.error("❌ Worker returned error status:", res.status);
+      return { options: [], categories: [] };
+    }
+
     const data = await res.json();
     console.log("⚡ Worker raw response:", data);
 
     let text = data?.choices?.[0]?.message?.content;
-    if (!text) return { options: [], categories: [] };
+    if (!text) {
+      console.error("❌ No content in AI response");
+      return { options: [], categories: [] };
+    }
 
     text = text.trim();
+    console.log("📝 Raw AI text:", text);
 
     // -------------------------------------
     // SUPER CLEANING: remove ALL Markdown crap
     // -------------------------------------
     text = text
-      .replace(/```json/i, "")
+      .replace(/```json/gi, "")
       .replace(/```/g, "")
-      .replace(/^json/i, "")
+      .replace(/^json\s*/i, "")
       .trim();
 
     console.log("🧹 Cleaned text:", text);
@@ -47,18 +51,24 @@ Return ONLY the JSON object, no other text.`;
     // Try parsing now
     try {
       const parsed = JSON.parse(text);
+      console.log("✅ Parsed JSON:", parsed);
+
       // Ensure we return the expected format
-      return {
+      const result = {
         options: Array.isArray(parsed.options) ? parsed.options.slice(0, 2) : [],
         categories: Array.isArray(parsed.categories) ? parsed.categories : []
       };
+
+      console.log("🎯 Final result:", result);
+      return result;
     } catch (err) {
-      console.error("JSON parse fail:", err, "Text was:", text);
+      console.error("❌ JSON parse fail:", err);
+      console.error("❌ Text that failed to parse:", text);
       return { options: [], categories: [] };
     }
 
   } catch (err) {
-    console.error("Error inside askGemini:", err);
+    console.error("❌ Error inside askGemini:", err);
     return { options: [], categories: [] };
   }
 }

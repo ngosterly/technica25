@@ -60,10 +60,18 @@ export default function DecisionPage() {
     try {
       const aiResponse = await askGemini(userText);
       console.log("🔥 AI returned response:", aiResponse);
+      console.log("🔍 Response type:", typeof aiResponse);
+      console.log("🔍 Options is array?", Array.isArray(aiResponse.options));
+      console.log("🔍 Options value:", aiResponse.options);
+      console.log("🔍 Categories is array?", Array.isArray(aiResponse.categories));
+      console.log("🔍 Categories value:", aiResponse.categories);
 
       // Extract options
       if (Array.isArray(aiResponse.options) && aiResponse.options.length >= 2) {
         extractedOptions = aiResponse.options.slice(0, 2).map((opt) => String(opt).trim());
+        console.log("✅ Successfully extracted options:", extractedOptions);
+      } else {
+        console.warn("⚠️ Options check failed. Length:", aiResponse.options?.length);
       }
 
       // Extract categories
@@ -75,10 +83,13 @@ export default function DecisionPage() {
               .filter((c) => c.length > 0)
           )
         );
+        console.log("✅ Successfully extracted categories:", suggestedCategories);
+      } else {
+        console.warn("⚠️ Categories check failed. Length:", aiResponse.categories?.length);
       }
 
-      console.log("🔍 Extracted Options:", extractedOptions);
-      console.log("🔍 Suggested Categories:", suggestedCategories);
+      console.log("🔍 Final Extracted Options:", extractedOptions);
+      console.log("🔍 Final Suggested Categories:", suggestedCategories);
 
     } catch (err) {
       console.error("AI extraction failed:", err);
