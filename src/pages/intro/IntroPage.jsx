@@ -42,7 +42,7 @@ const IntroPage = () => {
             Making decisions shouldn't be spooky. We're here to help you navigate choices
             with clarity, care, and confidence.
           </p>
-          <Link to="/chatbot" className="cta-button-hero">
+          <Link to="/decision" className="cta-button-hero">
             Start Your Journey
           </Link>
         </div>
@@ -214,8 +214,8 @@ const IntroPage = () => {
           <h2>Ready to Start?</h2>
           <p>Take the first step toward clearer, more confident decision-making.</p>
           <div className="cta-buttons">
-            <Link to="/chatbot" className="cta-button-primary">
-              Try the Chatbot
+            <Link to="/DecisionPage" className="cta-button-primary">
+              Try the Decision Maker
             </Link>
             <Link to="/journal" className="cta-button-secondary">
               Start Journaling
