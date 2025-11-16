@@ -1,51 +1,41 @@
 import { useState } from 'react';
-import { initializeApp } from 'firebase/app';
+import { useNavigate } from 'react-router-dom';
 import {
-  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   updateProfile
 } from 'firebase/auth';
+import { auth } from '../../contexts/AuthContext';
 import logo from '../../assets/logo.png';
 
-// Your Firebase configuration
-const firebaseConfig = {
-
-  apiKey: "AIzaSyCl44oL6TMHWiqFjUgL6ErLY8JenzqzxYI",
-  authDomain: "decisionera-67322.firebaseapp.com",
-  databaseURL: "https://decisionera-67322-default-rtdb.firebaseio.com",
-  projectId: "decisionera-67322",
-  storageBucket: "decisionera-67322.firebasestorage.app",
-  messagingSenderId: "770765484496",
-  appId: "1:770765484496:web:0f6b13c279c6f6c69c89d5",
-  measurementId: "G-RERKVST1HK"
-};
-
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
+
+  // Add placeholder styling
+  const placeholderStyle = `
+    .auth-input::placeholder {
+      color: #999;
+      opacity: 1;
+    }
+  `;
 
   // Handle Email Login
   const handleEmailLogin = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(
-        auth, 
-        loginData.email, 
+        auth,
+        loginData.email,
         loginData.password
       );
       console.log('Login successful:', userCredential.user);
-      // Redirect to your app's main page
-      // window.location.href = '/dashboard';
-      alert('Login successful!');
+      navigate('/home');
     } catch (error) {
       console.error('Login error:', error);
       alert(`Login failed: ${error.message}`);
@@ -61,20 +51,18 @@ export default function AuthPage() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        registerData.email, 
+        auth,
+        registerData.email,
         registerData.password
       );
-      
+
       // Update user profile with display name
       await updateProfile(userCredential.user, {
         displayName: registerData.name
       });
 
       console.log('Registration successful:', userCredential.user);
-      // Redirect to your app's main page
-      // window.location.href = '/dashboard';
-      alert('Account created successfully!');
+      navigate('/home');
     } catch (error) {
       console.error('Registration error:', error);
       alert(`Registration failed: ${error.message}`);
@@ -86,9 +74,7 @@ export default function AuthPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful:', result.user);
-      // Redirect to your app's main page
-      // window.location.href = '/dashboard';
-      alert('Google sign-in successful!');
+      navigate('/home');
     } catch (error) {
       console.error('Google sign-in error:', error);
       alert(`Google sign-in failed: ${error.message}`);
@@ -97,6 +83,7 @@ export default function AuthPage() {
 
   return (
     <div style={styles.body}>
+      <style>{placeholderStyle}</style>
       <div style={styles.container}>
         <div style={styles.authBox}>
           <div style={styles.logoSection}>
@@ -117,6 +104,7 @@ export default function AuthPage() {
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                   onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
                   style={styles.input}
+                  className="auth-input"
                 />
               </div>
               <div style={styles.inputGroup}>
@@ -127,6 +115,7 @@ export default function AuthPage() {
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                   onKeyPress={(e) => e.key === 'Enter' && handleEmailLogin()}
                   style={styles.input}
+                  className="auth-input"
                 />
               </div>
               <button onClick={handleEmailLogin} style={styles.btnPrimary}>
@@ -164,6 +153,7 @@ export default function AuthPage() {
                   value={registerData.name}
                   onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
                   style={styles.input}
+                  className="auth-input"
                 />
               </div>
               <div style={styles.inputGroup}>
@@ -173,6 +163,7 @@ export default function AuthPage() {
                   value={registerData.email}
                   onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                   style={styles.input}
+                  className="auth-input"
                 />
               </div>
               <div style={styles.inputGroup}>
@@ -183,6 +174,7 @@ export default function AuthPage() {
                   onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                   onKeyPress={(e) => e.key === 'Enter' && handleEmailRegister()}
                   style={styles.input}
+                  className="auth-input"
                 />
               </div>
               <button onClick={handleEmailRegister} style={styles.btnPrimary}>
@@ -282,6 +274,7 @@ const styles = {
     fontSize: '15px',
     transition: 'all 0.3s ease',
     background: 'white',
+    color: '#333',
     // To use input texture: backgroundImage: 'url("path/to/your/input-texture.png")',
     // backgroundSize: 'cover',
     boxSizing: 'border-box',
