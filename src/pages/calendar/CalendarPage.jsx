@@ -4,11 +4,13 @@ import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { ChevronLeft, ChevronRight, MoodOutlined, LightbulbOutlined } from '@mui/icons-material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import MenuBook from '@mui/icons-material/MenuBook';
-import { getAllEntries, getEntryByDate, saveEntry } from '../../utils/journalStorage';
+import { getAllEntries, getEntryByDate, saveEntry } from '../../utils/firebaseJournalStorage';
 import { HappyFace, SadFace, MadFace, MehFace, NeutralFace, NoFace } from '../../components/MoodIcons';
+import { useAuth } from '../../contexts/AuthContext';
 import './CalendarPage.css';
 
 const CalendarPage = () => {
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [entriesMap, setEntriesMap] = useState({});
@@ -18,6 +20,7 @@ const CalendarPage = () => {
   const [statsInterval, setStatsInterval] = useState('month'); // 'month', '3months', 'year'
   const [showMoodSelector, setShowMoodSelector] = useState(false);
   const [moodSelectorDate, setMoodSelectorDate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const moods = [
     { name: 'happy', color: '#FFD93D', label: 'Happy', icon: HappyFace },
@@ -29,10 +32,25 @@ const CalendarPage = () => {
   ];
 
   useEffect(() => {
-    const entries = getAllEntries();
-    setEntriesMap(entries);
-    calculateMoodStats(entries, statsInterval);
-  }, [statsInterval]);
+    if (currentUser) {
+      loadEntries();
+    }
+  }, [currentUser, statsInterval]);
+
+  const loadEntries = async () => {
+    if (!currentUser) return;
+
+    setLoading(true);
+    try {
+      const entries = await getAllEntries(currentUser.uid);
+      setEntriesMap(entries);
+      calculateMoodStats(entries, statsInterval);
+    } catch (error) {
+      console.error('Error loading entries:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const calculateMoodStats = (entries, interval) => {
     const stats = {};
@@ -124,20 +142,20 @@ const CalendarPage = () => {
     setShowMoodSelector(true);
   };
 
-  const handleMoodSelect = (moodName) => {
+  const handleMoodSelect = async (moodName) => {
+    if (!currentUser) return;
+
     const dateKey = formatDateKey(moodSelectorDate);
-    const existingEntry = getEntryByDate(dateKey) || {};
-    
-    saveEntry(dateKey, {
+    const existingEntry = await getEntryByDate(currentUser.uid, dateKey) || {};
+
+    await saveEntry(currentUser.uid, dateKey, {
       ...existingEntry,
       mood: moodName,
       updatedAt: new Date().toISOString()
     });
 
     // Refresh entries
-    const entries = getAllEntries();
-    setEntriesMap(entries);
-    calculateMoodStats(entries, statsInterval);
+    await loadEntries();
     
     setShowMoodSelector(false);
     setMoodSelectorDate(null);
@@ -217,7 +235,7 @@ const CalendarPage = () => {
               }
 
               const dateKey = formatDateKey(date);
-              const entry = getEntryByDate(dateKey);
+              const entry = entriesMap[dateKey];
               const hasMood = entry?.mood;
               const hasJournal = entry?.text;
               const hasDecision = false; // TODO: potentially implement decision tracking
@@ -288,7 +306,7 @@ const CalendarPage = () => {
 
               {(() => {
                 const dateKey = formatDateKey(selectedDate);
-                const entry = getEntryByDate(dateKey);
+                const entry = entriesMap[dateKey];
                 if (entry) {
                   return (
                     <div className="current-data">
@@ -324,7 +342,7 @@ const CalendarPage = () => {
               {moods.slice(0, -1).map((mood) => {
                 const MoodIconComponent = mood.icon;
                 const dateKey = formatDateKey(moodSelectorDate);
-                const currentEntry = getEntryByDate(dateKey);
+                const currentEntry = entriesMap[dateKey];
                 const isSelected = currentEntry?.mood === mood.name;
                 
                 return (

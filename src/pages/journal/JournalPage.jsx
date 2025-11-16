@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { IconButton, Button } from '@mui/material';
 import { Edit, Save, Close, ChevronLeft, ChevronRight, Today, Add } from '@mui/icons-material';
-import { getAllEntries, saveEntry, getEntryByDate } from '../../utils/journalStorage';
+import { getAllEntries, saveEntry, getEntryByDate } from '../../utils/firebaseJournalStorage';
 import { HappyFace, SadFace, MadFace, MehFace, NeutralFace, NoFace } from '../../components/MoodIcons';
 import HappyGhost from '../../components/HappyGhost';
+import { useAuth } from '../../contexts/AuthContext';
 import './JournalPage.css';
 
 const JournalPage = () => {
+  const { currentUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -17,6 +19,7 @@ const JournalPage = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const moods = [
     { name: 'happy', color: '#FFD93D', label: 'Happy', icon: HappyFace },
@@ -34,14 +37,16 @@ const JournalPage = () => {
     return new Date(d.setDate(diff));
   }
 
-  function getWeekEntries(weekStart) {
+  async function getWeekEntries(weekStart) {
+    if (!currentUser) return [];
+
     const week = [];
     const start = new Date(weekStart);
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
       const dateKey = date.toISOString().split('T')[0];
-      const entry = getEntryByDate(dateKey);
+      const entry = await getEntryByDate(currentUser.uid, dateKey);
       week.push({
         date: dateKey,
         dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
@@ -53,31 +58,43 @@ const JournalPage = () => {
   }
 
   useEffect(() => {
-    loadAllEntries();
-    
-    // check if a date is specified in URL params
-    const dateParam = searchParams.get('date');
-    if (dateParam) {
-      const entry = getEntryByDate(dateParam);
-      if (entry) {
-        setSelectedEntry({ date: dateParam, ...entry });
-        setJournalText(entry.text || '');
-      } else {
-        setCurrentDate(dateParam);
-        setSelectedEntry({ date: dateParam });
-        setEditMode(true);
-      }
-      setSearchParams({});
-    }
-  }, [searchParams, setSearchParams, currentWeekStart]);
+    if (currentUser) {
+      loadAllEntries();
 
-  const loadAllEntries = () => {
-    const entriesMap = getAllEntries();
-    // convert to array and sort by date (newest first)
-    const entriesArray = Object.entries(entriesMap)
-      .map(([date, data]) => ({ date, ...data }))
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-    setEntries(entriesArray);
+      // check if a date is specified in URL params
+      const dateParam = searchParams.get('date');
+      if (dateParam) {
+        getEntryByDate(currentUser.uid, dateParam).then(entry => {
+          if (entry) {
+            setSelectedEntry({ date: dateParam, ...entry });
+            setJournalText(entry.text || '');
+          } else {
+            setCurrentDate(dateParam);
+            setSelectedEntry({ date: dateParam });
+            setEditMode(true);
+          }
+        });
+        setSearchParams({});
+      }
+    }
+  }, [currentUser, searchParams, setSearchParams, currentWeekStart]);
+
+  const loadAllEntries = async () => {
+    if (!currentUser) return;
+
+    setLoading(true);
+    try {
+      const entriesMap = await getAllEntries(currentUser.uid);
+      // convert to array and sort by date (newest first)
+      const entriesArray = Object.entries(entriesMap)
+        .map(([date, data]) => ({ date, ...data }))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      setEntries(entriesArray);
+    } catch (error) {
+      console.error('Error loading entries:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getFilteredEntriesByWeek = () => {
@@ -116,10 +133,12 @@ const JournalPage = () => {
     }, 300);
   };
 
-  const handleNewEntry = () => {
+  const handleNewEntry = async () => {
+    if (!currentUser) return;
+
     const today = new Date().toISOString().split('T')[0];
-    const existingEntry = getEntryByDate(today);
-    
+    const existingEntry = await getEntryByDate(currentUser.uid, today);
+
     setCurrentDate(today);
     setJournalText(existingEntry?.text || '');
     setSelectedMood(existingEntry?.mood || null);
@@ -127,26 +146,28 @@ const JournalPage = () => {
     setEditMode(true);
   };
 
-  const handleSaveEntry = () => {
+  const handleSaveEntry = async () => {
+    if (!currentUser) return;
+
     if (!journalText.trim() && !selectedMood) {
       alert('Please write something or select a mood before saving!');
       return;
     }
 
-    const existingEntry = getEntryByDate(currentDate) || {};
-    
-    saveEntry(currentDate, {
+    const existingEntry = await getEntryByDate(currentUser.uid, currentDate) || {};
+
+    await saveEntry(currentUser.uid, currentDate, {
       ...existingEntry,
       text: journalText,
       mood: selectedMood,
       updatedAt: new Date().toISOString()
     });
 
-    loadAllEntries();
+    await loadAllEntries();
     setEditMode(false);
-    
+
     // updating selected entry
-    const updatedEntry = getEntryByDate(currentDate);
+    const updatedEntry = await getEntryByDate(currentUser.uid, currentDate);
     setSelectedEntry({ date: currentDate, ...updatedEntry });
   };
 
@@ -197,8 +218,19 @@ const JournalPage = () => {
     setCurrentWeekStart(getWeekStart(new Date()));
   };
 
-  const weekEntries = getWeekEntries(currentWeekStart);
   const filteredEntries = getFilteredEntriesByWeek();
+
+  if (loading) {
+    return (
+      <div className="journal-page">
+        <div className="journal-container">
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>Loading your journal...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="journal-page">

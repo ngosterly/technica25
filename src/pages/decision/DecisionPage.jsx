@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./DecisionPage.css";
 import { askGemini } from "../../api/gemini";
+import { saveDecision } from "../../utils/firebaseDecisionStorage";
+import { useAuth } from "../../contexts/AuthContext";
 
 const STEPS = {
   ASK_QUESTION: "ask_question",
@@ -11,6 +13,7 @@ const STEPS = {
 };
 
 export default function DecisionPage() {
+  const { currentUser } = useAuth();
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -29,9 +32,7 @@ export default function DecisionPage() {
   const [weights, setWeights] = useState({});
   const [ratings, setRatings] = useState({});
   const [isTyping, setIsTyping] = useState(false);
-
-  // TEMP: hardcoded options
-  const [options] = useState(["Scotland", "Korea"]);
+  const [options, setOptions] = useState([]);
 
   /* -------------------------------------------------------
         SEND BUTTON HANDLER
@@ -53,35 +54,46 @@ export default function DecisionPage() {
     setIsTyping(true);
     setStep(null);
 
-    let aiCategories = [];
+    let extractedOptions = [];
     let suggestedCategories = [];
 
     try {
-      aiCategories = await askGemini(userText);
-      console.log("🔥 AI returned categories:", aiCategories);
+      const aiResponse = await askGemini(userText);
+      console.log("🔥 AI returned response:", aiResponse);
 
-      if (Array.isArray(aiCategories) && aiCategories.length > 0) {
+      // Extract options
+      if (Array.isArray(aiResponse.options) && aiResponse.options.length >= 2) {
+        extractedOptions = aiResponse.options.slice(0, 2).map((opt) => String(opt).trim());
+      }
+
+      // Extract categories
+      if (Array.isArray(aiResponse.categories) && aiResponse.categories.length > 0) {
         suggestedCategories = Array.from(
           new Set(
-            aiCategories
+            aiResponse.categories
               .map((c) => String(c).trim())
               .filter((c) => c.length > 0)
           )
         );
       }
 
-      // LOG BEFORE FALLBACK
-      console.log("🔍 BEFORE FALLBACK — Suggested:", suggestedCategories);
-      console.log("🔍 BEFORE FALLBACK — Raw AI:", aiCategories);
+      console.log("🔍 Extracted Options:", extractedOptions);
+      console.log("🔍 Suggested Categories:", suggestedCategories);
 
     } catch (err) {
       console.error("AI extraction failed:", err);
     }
 
-    // Fallback default categories only if necessary
+    // Fallback for options if AI didn't extract them
+    if (extractedOptions.length < 2) {
+      console.warn("⚠ AI returned insufficient options — using defaults");
+      extractedOptions = ["Option A", "Option B"];
+    }
+
+    // Fallback for categories only if necessary
     if (suggestedCategories.length === 0) {
       console.warn("⚠ AI returned no usable categories — using defaults");
-      suggestedCategories = ["Cost", "Time", "Culture", "Safety", "Weather"];
+      suggestedCategories = ["Cost", "Time", "Impact", "Difficulty", "Satisfaction"];
     }
 
     setTimeout(() => {
@@ -93,10 +105,11 @@ export default function DecisionPage() {
           id: prev.length + 1,
           type: "bot",
           text:
-            "Thanks for sharing that. Based on your decision, here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'",
+            `Great! I understand you're deciding between ${extractedOptions[0]} and ${extractedOptions[1]}. Based on your decision, here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'`,
         },
       ]);
 
+      setOptions(extractedOptions);
       setCategories(suggestedCategories);
       setStep(STEPS.EDIT_CATEGORIES);
     }, 1500);
@@ -291,9 +304,30 @@ export default function DecisionPage() {
 
       <button
         className="primary-button"
-        onClick={() => {
+        onClick={async () => {
           setIsTyping(true);
           setStep(null);
+
+          // Calculate results
+          const scores = calculateResults();
+          const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+          const [bestOption, bestScore] = sorted[0];
+
+          // Save decision to Firebase
+          if (currentUser) {
+            const decisionData = {
+              question: decision,
+              options: options,
+              categories: categories,
+              weights: weights,
+              ratings: ratings,
+              scores: scores,
+              bestOption: bestOption,
+              overallScore: bestScore
+            };
+
+            await saveDecision(currentUser.uid, decisionData);
+          }
 
           setTimeout(() => {
             setIsTyping(false);
