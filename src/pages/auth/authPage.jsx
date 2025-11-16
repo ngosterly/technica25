@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
+import {
+  getAuth,
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   updateProfile
 } from 'firebase/auth';
+import logo from '../../assets/logo.png';
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -99,8 +100,7 @@ export default function AuthPage() {
       <div style={styles.container}>
         <div style={styles.authBox}>
           <div style={styles.logoSection}>
-            {/* Replace with your logo image */}
-            <div style={styles.logoPlaceholder}>LOGO</div>
+            <img src={logo} alt="Logo" style={styles.logo} />
           </div>
 
           {isLogin ? (
@@ -249,23 +249,12 @@ const styles = {
     textAlign: 'center',
     marginBottom: '30px',
   },
-  logoPlaceholder: {
-    // Placeholder - replace with actual logo image
+  logo: {
     width: '80px',
     height: '80px',
     margin: '0 auto',
-    background: '#667eea',
-    // To use logo image: backgroundImage: 'url("path/to/your/logo.png")',
-    // backgroundSize: 'contain',
-    // backgroundRepeat: 'no-repeat',
-    // backgroundPosition: 'center',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '14px',
+    display: 'block',
+    objectFit: 'contain',
   },
   formContainer: {
     animation: 'fadeIn 0.3s ease-in',

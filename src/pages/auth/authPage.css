@@ -34,29 +34,26 @@ body {
     background-size: cover;
     background-position: center;
     */
-    border-radius: 20px;
-    padding: 40px;
+    border-radius: 0px;
+    padding: 0px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
 }
 
 .logo-section {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 0px;
 }
 
-.logo-placeholder {
-    /* Placeholder - replace with actual logo image */
-    width: 80px;
-    height: 80px;
+.logo {
+    width: 200px;
+    height: 200px;
     margin: 0 auto;
     background: #667eea;
-    /* To use logo image, uncomment and replace:
-    background-image: url('path/to/your/logo.png');
+    background-image: url('/src/assets/logo.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    */
     border-radius: 50%;
     display: flex;
     align-items: center;
