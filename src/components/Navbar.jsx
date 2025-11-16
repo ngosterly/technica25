@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { auth } from '../contexts/AuthContext';
 import { signOut } from 'firebase/auth';
 import './Navbar.css';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const location = useLocation();
@@ -23,7 +24,8 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/home" className="nav-logo">
+        <Link to="/" className="nav-logo">
+          <img src={logo} alt="Decisionera Logo" className="nav-logo-img" />
           Decisionera
         </Link>
 
