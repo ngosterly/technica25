@@ -1,35 +1,63 @@
-export async function askGemini(prompt) {
+export async function askGemini(prompt, userId = null) {
   try {
+    console.log("🤖 Sending prompt to AI:", prompt);
+    console.log("👤 User ID:", userId);
+
     // Enhanced prompt to extract both options and categories
-    const enhancedPrompt = `Based on this decision question: "${prompt}"
+    const enhancedPrompt = `Analyze this decision question and extract the two options being compared and suggest relevant categories.
 
-Please identify:
-1. The TWO options being compared (extract them from the question)
-2. Relevant decision-making categories to evaluate these options
+Question: "${prompt}"
 
-Return ONLY a JSON object in this exact format:
-{
-  "options": ["Option 1", "Option 2"],
-  "categories": ["Category 1", "Category 2", "Category 3", "Category 4", "Category 5"]
-}
+Respond with ONLY a valid JSON object (no markdown, no code blocks) in exactly this format:
+{"options": ["Option A", "Option B"], "categories": ["Category1", "Category2", "Category3", "Category4", "Category5"]}
 
 Example:
-Question: "Should I study abroad in Scotland or Korea?"
-Response: {"options": ["Scotland", "Korea"], "categories": ["Cost", "Culture", "Language Barrier", "Career Opportunities", "Weather"]}
+Question: "Should I buy a house or rent an apartment?"
+Response: {"options": ["Buy a house", "Rent an apartment"], "categories": ["Cost", "Flexibility", "Long-term Investment", "Maintenance", "Location"]}`;
 
-Return ONLY the JSON object, no other text.`;
+    const requestBody = {
+      prompt: enhancedPrompt
+    };
 
-    const res = await fetch("https://decisionera-ai.laylaaphipps.workers.dev/", {
+    // Include userId if provided
+    if (userId) {
+      requestBody.userId = userId;
+    }
+
+    console.log("📤 Request body:", requestBody);
+
+    // TODO: Replace this URL with your Cloudflare Worker URL after deployment
+    const WORKER_URL = "https://hail.trbrozek.workers.dev/";
+
+    const res = await fetch(WORKER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: enhancedPrompt }),
+      body: JSON.stringify(requestBody),
     });
+
+    if (!res.ok) {
+      console.error("❌ Worker returned error status:", res.status);
+      return { options: [], categories: [] };
+    }
 
     const data = await res.json();
     console.log("⚡ Worker raw response:", data);
 
+    // Check for error response
+    if (data.error) {
+      console.error("❌ Worker returned error:", data.error);
+      if (data.error.code === 401) {
+        console.error("❌ Authentication error - Worker requires valid user authentication");
+      }
+      return { options: [], categories: [] };
+    }
+
     let text = data?.choices?.[0]?.message?.content;
-    if (!text) return { options: [], categories: [] };
+    if (!text) {
+      console.error("❌ No content in AI response");
+      console.error("❌ Full response structure:", JSON.stringify(data, null, 2));
+      return { options: [], categories: [] };
+    }
 
     text = text.trim();
 
