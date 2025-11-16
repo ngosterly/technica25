@@ -1,14 +1,14 @@
-# Decisionera 🧠✨
+# Decisionera
 
 **Making decisions shouldn't be overwhelming.** Decisionera is a mental health-conscious decision-making platform that helps you navigate life's choices with clarity, care, and confidence.
 
-Built at **Technica 2025** — the world's largest all-women and non-binary hackathon.
+Built at **Technica 2025**
 
 ## ☆ About
 
 Decisionera combines AI-powered decision analysis with mood tracking and journaling to support your mental well-being while helping you make important decisions. We use a thoughtful, category-based approach that considers your unique needs, preferences, and mental health considerations.
 
-### Key Features
+### Key Features!
 
 - **AI Decision Maker**: Interactive decision-making assistant that helps you evaluate choices using a customizable decision matrix
 - **Journal Integration**: Connect your daily thoughts with decision-making to provide context and track your emotional journey
@@ -67,14 +67,7 @@ Track your daily moods and journal entries in a beautifully designed interface. 
 ### Calendar Visualization
 View your emotional journey over time with an interactive calendar that displays mood icons for each day. Click any day to navigate directly to your journal entry.
 
-## 🎨 Design Philosophy
-
-- **Calming Color Palette**: Pink-to-blue gradients (#ffc4df to #a2b4f5) designed to reduce stress
-- **Intuitive Navigation**: Clean, minimal interface with clear pathways
-- **Accessibility First**: High contrast text, clear typography, and responsive design
-- **Safe Language**: Avoiding triggering words, focusing on growth and learning
-
-## 👥 Team
+## Team
 
 Built by passionate full-stack developers who understand the importance of mental health in technology:
 
@@ -83,19 +76,17 @@ Built by passionate full-stack developers who understand the importance of menta
 - **Tommy Brozek** - Full Stack Developer
 - **Brennen Mccorison** - Full Stack Developer
 
-## 🤝 Contributing
+## Contributing
 
 This project was created for Technica 2025. While it's currently a hackathon project, we welcome feedback and suggestions!
 
-## 📄 License
+## License
 
 This project is part of the Technica 2025 hackathon submission.
 
-## 🔗 Links
+## Links
 
 - [GitHub Repository](https://github.com/ngosterly/technica25)
 - [Technica Hackathon](https://gotechnica.org/)
 
 ---
-
-**Note**: This project uses the React + Vite template with HMR (Hot Module Replacement) and ESLint rules for optimal development experience.

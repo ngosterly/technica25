@@ -4,7 +4,7 @@ import { IconButton, Button } from '@mui/material';
 import { Edit, Save, Close, ChevronLeft, ChevronRight, Today, Add } from '@mui/icons-material';
 import { getAllEntries, saveEntry, getEntryByDate } from '../../utils/journalStorage';
 import { HappyFace, SadFace, MadFace, MehFace, NeutralFace, NoFace } from '../../components/MoodIcons';
-import HappyGhost from '../../components/HappyGhost';
+import ghostImg from '../../assets/ghost.png';
 import './JournalPage.css';
 
 const JournalPage = () => {
@@ -353,7 +353,7 @@ const JournalPage = () => {
                   Create Your First Entry
                 </Button>
               </div>
-              <HappyGhost className="ghost-animation" />
+              <img src={ghostImg} alt="Happy Ghost" className="ghost-animation" />
             </div>
           )}
         </div>

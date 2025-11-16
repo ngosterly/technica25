@@ -3,17 +3,16 @@
   background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
   padding: 0;
   width: 100%;
-  font-family: 'Raleway', sans-serif;
   border-left: none;
   box-shadow: none;
 }
 
 .journal-container {
   display: grid;
-  grid-template-columns: 280px 1fr 250px;
+  grid-template-columns: 250px 1fr 200px;
   height: calc(100vh - 80px);
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   border-left: none;
   box-shadow: none;
 }
@@ -605,6 +604,8 @@
   opacity: 0;
   animation: ghostFlyIn 1.5s ease-out forwards, ghostFloat 3s ease-in-out 1.5s infinite;
   transform-origin: center;
+  max-width: 200px;
+  height: auto;
 }
 
 @keyframes ghostFlyIn {
