@@ -1,0 +1,70 @@
+{
+  "decisions": [
+    {
+      "id": "decision_001",
+      "userId": "user_001",
+      "query": "Should I take the job offer in New York or stay at my current position?",
+      "timestamp": "2025-11-05T14:30:00Z",
+      "categories": [
+        {
+          "categoryId": "cat_001",
+          "userScore": 6,
+          "aiSuggestion": 5,
+          "finalScore": 5.5,
+          "reasoning": "Consider that both options have potential for growth. The new opportunity offers fresh experiences."
+        },
+        {
+          "categoryId": "cat_002",
+          "userScore": 7,
+          "aiSuggestion": 6,
+          "finalScore": 6.5,
+          "reasoning": "Job changes are moderately reversible - you can always seek new opportunities later."
+        },
+        {
+          "categoryId": "cat_004",
+          "userScore": 5,
+          "aiSuggestion": 4,
+          "finalScore": 4.5,
+          "reasoning": "Change can create temporary anxiety, but stability in your choice can reduce it over time."
+        }
+      ],
+      "overallScore": 5.5,
+      "recommendation": "Based on your input, this decision shows moderate considerations across categories. Take time to reflect on your priorities.",
+      "includeJournal": true,
+      "journalEntryId": "entry_001"
+    },
+    {
+      "id": "decision_002",
+      "userId": "user_002",
+      "query": "Should I go to the party tonight or stay home and rest?",
+      "timestamp": "2025-11-10T19:00:00Z",
+      "categories": [
+        {
+          "categoryId": "cat_007",
+          "userScore": 3,
+          "aiSuggestion": 4,
+          "finalScore": 3.5,
+          "reasoning": "Parties typically require moderate to high energy. Consider your current energy reserves."
+        },
+        {
+          "categoryId": "cat_005",
+          "userScore": 6,
+          "aiSuggestion": 7,
+          "finalScore": 6.5,
+          "reasoning": "Rest can be rejuvenating for mental health, especially when energy is low."
+        },
+        {
+          "categoryId": "cat_008",
+          "userScore": 5,
+          "aiSuggestion": 6,
+          "finalScore": 5.5,
+          "reasoning": "Social connections are valuable, but so is honoring your need for rest."
+        }
+      ],
+      "overallScore": 5.2,
+      "recommendation": "Your well-being matters. Both options have merit - trust what feels right for your current state.",
+      "includeJournal": true,
+      "journalEntryId": "entry_003"
+    }
+  ]
+}

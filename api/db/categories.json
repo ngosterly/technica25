@@ -1,0 +1,160 @@
+{
+  "defaultCategories": [
+    {
+      "id": "cat_001",
+      "name": "Regret Likelihood",
+      "description": "How likely are you to feel regret about this decision later?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "No regret expected",
+          "5": "Moderate possibility",
+          "10": "High chance of regret"
+        }
+      },
+      "weight": 1.5
+    },
+    {
+      "id": "cat_002",
+      "name": "Reversibility Score",
+      "description": "How easily can you reverse or change this decision?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Permanent/Very difficult",
+          "5": "Moderate effort needed",
+          "10": "Easily reversible"
+        }
+      },
+      "weight": 1.3
+    },
+    {
+      "id": "cat_003",
+      "name": "Impact on Sleep",
+      "description": "How might this decision affect your sleep quality?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very negative impact",
+          "5": "Neutral",
+          "10": "Very positive impact"
+        }
+      },
+      "weight": 1.2
+    },
+    {
+      "id": "cat_004",
+      "name": "Impact on Anxiety",
+      "description": "How might this decision affect your anxiety levels?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Significantly increases anxiety",
+          "5": "Neutral",
+          "10": "Significantly reduces anxiety"
+        }
+      },
+      "weight": 1.4
+    },
+    {
+      "id": "cat_005",
+      "name": "Impact on Mental Health",
+      "description": "Overall impact on your mental well-being",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very negative",
+          "5": "Neutral",
+          "10": "Very positive"
+        }
+      },
+      "weight": 1.5
+    },
+    {
+      "id": "cat_006",
+      "name": "Potential for Overstimulation",
+      "description": "How likely is this decision to lead to overstimulation?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very low risk",
+          "5": "Moderate risk",
+          "10": "Very high risk"
+        }
+      },
+      "weight": 1.1
+    },
+    {
+      "id": "cat_007",
+      "name": "Energy Level Required",
+      "description": "How much energy will this decision demand from you?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very low energy",
+          "5": "Moderate energy",
+          "10": "Very high energy"
+        }
+      },
+      "weight": 1.0
+    },
+    {
+      "id": "cat_008",
+      "name": "Social Impact",
+      "description": "How will this affect your relationships and social life?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very negative",
+          "5": "Neutral",
+          "10": "Very positive"
+        }
+      },
+      "weight": 1.1
+    },
+    {
+      "id": "cat_009",
+      "name": "Financial Consideration",
+      "description": "What is the financial impact of this decision?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Very negative financially",
+          "5": "Neutral",
+          "10": "Very positive financially"
+        }
+      },
+      "weight": 1.2
+    },
+    {
+      "id": "cat_010",
+      "name": "Time Commitment",
+      "description": "How much time will this decision require?",
+      "scale": {
+        "min": 0,
+        "max": 10,
+        "labels": {
+          "0": "Minimal time",
+          "5": "Moderate time",
+          "10": "Significant time investment"
+        }
+      },
+      "weight": 1.0
+    }
+  ],
+  "mentalHealthCategories": [
+    "cat_003",
+    "cat_004",
+    "cat_005",
+    "cat_006"
+  ]
+}
