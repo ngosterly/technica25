@@ -8,7 +8,7 @@ Built at **Technica 2025**
 
 Decisionera combines AI-powered decision analysis with mood tracking and journaling to support your mental well-being while helping you make important decisions. We use a thoughtful, category-based approach that considers your unique needs, preferences, and mental health considerations.
 
-### Key Features
+### Key Features!
 
 - **AI Decision Maker**: Interactive decision-making assistant that helps you evaluate choices using a customizable decision matrix
 - **Journal Integration**: Connect your daily thoughts with decision-making to provide context and track your emotional journey
