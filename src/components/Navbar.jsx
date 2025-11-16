@@ -47,6 +47,12 @@ const Navbar = () => {
           </li>
           
           <li className="nav-item">
+            <Link to="/calendar" className={isActive('/calendar')}>
+              Calendar
+            </Link>
+          </li>
+          
+          <li className="nav-item">
             {location.pathname === '/' ? (
               <a 
                 href="#about-section" 

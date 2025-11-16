@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
-import { getAllEntries, hasEntryForDate, getEntryByDate, saveEntry } from '../../utils/journalStorage';
+import { useSearchParams } from 'react-router-dom';
+import { IconButton, Button } from '@mui/material';
+import { Edit, Save, Close, ChevronLeft, ChevronRight, Today, Add } from '@mui/icons-material';
+import { getAllEntries, saveEntry, getEntryByDate } from '../../utils/journalStorage';
 import { HappyFace, SadFace, MadFace, MehFace, NeutralFace, NoFace } from '../../components/MoodIcons';
-import IconButton from '@mui/material/IconButton';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import HappyGhost from '../../components/HappyGhost';
 import './JournalPage.css';
 
 const JournalPage = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [entries, setEntries] = useState([]);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [journalText, setJournalText] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
+  const [isFlipping, setIsFlipping] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
-  const [entriesMap, setEntriesMap] = useState({});
 
   const moods = [
     { name: 'happy', color: '#FFD93D', label: 'Happy', icon: HappyFace },
@@ -18,242 +24,357 @@ const JournalPage = () => {
     { name: 'mad', color: '#FF6B6B', label: 'Mad', icon: MadFace },
     { name: 'meh', color: '#8ed88cff', label: 'Anxious', icon: MehFace },
     { name: 'neutral', color: '#99cec5ff', label: 'Neutral', icon: NeutralFace },
-    { name: 'noface', color: '#ffffffff', label: 'None', icon: NoFace}
+    { name: 'noface', color: '#e0e0e0', label: 'None', icon: NoFace }
   ];
 
-  useEffect(() => {
-    const entries = getAllEntries();
-    setEntriesMap(entries);
-  }, []);
+  function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    return new Date(d.setDate(diff));
+  }
 
-  const getWeekDays = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
-    const currentDay = new Date(year, month, day);
-    const dayOfWeek = currentDay.getDay();
-    
-    const startOfWeek = new Date(currentDay);
-    startOfWeek.setDate(day - dayOfWeek);
-    
-    const days = [];
+  function getWeekEntries(weekStart) {
+    const week = [];
+    const start = new Date(weekStart);
     for (let i = 0; i < 7; i++) {
-      const weekDay = new Date(startOfWeek);
-      weekDay.setDate(startOfWeek.getDate() + i);
-      days.push(weekDay);
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+      const entry = getEntryByDate(dateKey);
+      week.push({
+        date: dateKey,
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNum: date.getDate(),
+        ...entry
+      });
+    }
+    return week;
+  }
+
+  useEffect(() => {
+    loadAllEntries();
+    
+    // Check if a date is specified in URL params
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      const entry = getEntryByDate(dateParam);
+      if (entry) {
+        setSelectedEntry({ date: dateParam, ...entry });
+        setJournalText(entry.text || '');
+      } else {
+        // Create new entry for this date
+        setCurrentDate(dateParam);
+        setSelectedEntry({ date: dateParam });
+        setEditMode(true);
+      }
+      // Clear the URL parameter
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, currentWeekStart]);
+
+  const loadAllEntries = () => {
+    const entriesMap = getAllEntries();
+    // Convert to array and sort by date (newest first)
+    const entriesArray = Object.entries(entriesMap)
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    setEntries(entriesArray);
+  };
+
+  const getFilteredEntriesByWeek = () => {
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    
+    // Create all 7 days of the week, even if no entry exists
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(currentWeekStart);
+      date.setDate(date.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      // Find existing entry for this date
+      const existingEntry = entries.find(entry => entry.date === dateKey);
+      
+      weekDays.push({
+        date: dateKey,
+        text: existingEntry?.text || '',
+        mood: existingEntry?.mood || null,
+        updatedAt: existingEntry?.updatedAt || null
+      });
     }
     
-    return days;
+    return weekDays;
   };
 
-  const formatDateKey = (date) => {
-    if (!date) return '';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const handleSelectEntry = (entry) => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      setSelectedEntry(entry);
+      setJournalText(entry.text || '');
+      setSelectedMood(entry.mood || null);
+      setEditMode(false);
+      setIsFlipping(false);
+    }, 300);
   };
 
-  const handleDateClick = (date) => {
-    if (!date) return;
-    setSelectedDate(date);
-    const dateKey = formatDateKey(date);
-    const entry = getEntryByDate(dateKey);
-    if (entry && entry.mood) {
-      setSelectedMood(entry.mood);
-    } else {
-      setSelectedMood(null);
+  const handleNewEntry = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const existingEntry = getEntryByDate(today);
+    
+    setCurrentDate(today);
+    setJournalText(existingEntry?.text || '');
+    setSelectedMood(existingEntry?.mood || null);
+    setSelectedEntry(existingEntry ? { date: today, ...existingEntry } : { date: today });
+    setEditMode(true);
+  };
+
+  const handleSaveEntry = () => {
+    if (!journalText.trim() && !selectedMood) {
+      alert('Please write something or select a mood before saving!');
+      return;
     }
+
+    const existingEntry = getEntryByDate(currentDate) || {};
+    
+    saveEntry(currentDate, {
+      ...existingEntry,
+      text: journalText,
+      mood: selectedMood,
+      updatedAt: new Date().toISOString()
+    });
+
+    loadAllEntries();
+    setEditMode(false);
+    
+    // Update selected entry
+    const updatedEntry = getEntryByDate(currentDate);
+    setSelectedEntry({ date: currentDate, ...updatedEntry });
   };
 
   const handleMoodSelect = (moodName) => {
-    setSelectedMood(moodName);
-    
-    if (selectedDate) {
-      const dateKey = formatDateKey(selectedDate);
-      const existingEntry = getEntryByDate(dateKey) || {};
-      
-      // Save the mood to localStorage
-      saveEntry(dateKey, {
-        ...existingEntry,
-        mood: moodName
-      });
-      
-      // Refresh entries
-      const updatedEntries = getAllEntries();
-      setEntriesMap(updatedEntries);
+    setSelectedMood(moodName === selectedMood ? null : moodName);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    if (selectedEntry) {
+      setJournalText(selectedEntry.text || '');
     }
   };
 
-  const handlePrevWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() - 7);
-    setCurrentDate(newDate);
+  const formatDisplayDate = (dateString) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
-  const handleNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + 7);
-    setCurrentDate(newDate);
-  };
-
-  const getWeekRange = () => {
-    const days = getWeekDays(currentDate);
-    const firstDay = days[0];
-    const lastDay = days[6];
-    
-    const firstMonth = firstDay.toLocaleDateString('en-US', { month: 'short' });
-    const lastMonth = lastDay.toLocaleDateString('en-US', { month: 'short' });
-    const year = firstDay.getFullYear();
-    
-    if (firstMonth === lastMonth) {
-      return `${firstMonth} ${firstDay.getDate()}-${lastDay.getDate()}, ${year}`;
-    } else {
-      return `${firstMonth} ${firstDay.getDate()} - ${lastMonth} ${lastDay.getDate()}, ${year}`;
-    }
-  };
-
-  const formatDayLabel = (date) => {
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const day = date.getDate();
-    
-    const suffix = (day) => {
-      if (day > 3 && day < 21) return 'th';
-      switch (day % 10) {
-        case 1: return 'st';
-        case 2: return 'nd';
-        case 3: return 'rd';
-        default: return 'th';
-      }
-    };
-    
-    return `${dayOfWeek}. ${month} ${day}${suffix(day)}`;
+  const getPreview = (text) => {
+    if (!text) return 'No content';
+    return text.length > 150 ? text.substring(0, 150) + '...' : text;
   };
 
   const getMoodIcon = (moodName) => {
     const mood = moods.find(m => m.name === moodName);
-    return mood ? mood.icon : null;
+    return mood ? { icon: mood.icon, color: mood.color } : null;
   };
 
-  const weekRange = getWeekRange();
-  const days = getWeekDays(currentDate);
+  const handlePrevWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(newWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const handleNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(newWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const handleToday = () => {
+    setCurrentWeekStart(getWeekStart(new Date()));
+  };
+
+  const weekEntries = getWeekEntries(currentWeekStart);
+  const filteredEntries = getFilteredEntriesByWeek();
 
   return (
     <div className="journal-page">
-      <div className="journal-layout">
-        <div className="calendar-section">
-          {/* <div className="calendar-header"> */}
-            {/* <button onClick={handlePrevWeek} className="month-nav">←</button> */}
-            {/* <h2>{weekRange}</h2> */}
-
-          <IconButton 
-            aria-label="back" 
-            onClick={handlePrevWeek}
-            sx={{
-              width: 36,
-              height: 36,
-              border: '2px solid #667eea',
-              borderRadius: '50%',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              '&:hover': {
-                backgroundColor: '#667eea',
-                '& svg': {
-                  color: 'white'
+      <div className="journal-container">
+        <div className="entries-sidebar">
+          <div className="sidebar-header">
+            <h2>Journal Entries</h2>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleNewEntry}
+              sx={{
+                width: '100%',
+                backgroundColor: 'white',
+                color: '#667eea',
+                '&:hover': {
+                  backgroundColor: '#f8f9fa'
                 }
-              }
-            }}
-          >
-            <ArrowBackIosIcon sx={{ color: '#667eea', fontSize: 18 }} />
-          </IconButton>
-            
-          {/* </div> */}
-          
-          <div className="calendar-grid">
-            {days.map((date, index) => {
-              const dateKey = formatDateKey(date);
-              const entry = getEntryByDate(dateKey);
-              const hasEntry = !!entry;
-              const isSelected = selectedDate && formatDateKey(selectedDate) === dateKey;
-              const isToday = formatDateKey(date) === formatDateKey(new Date());
-              const MoodIcon = entry?.mood ? getMoodIcon(entry.mood) : null;
-              const moodColor = entry?.mood ? moods.find(m => m.name === entry.mood)?.color : null;
-              
-              return (
-                <div
-                  key={index}
-                  className={`calendar-day ${hasEntry ? 'has-entry' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-                  onClick={() => handleDateClick(date)}
-                >
-                  <div className="day-label-text">{formatDayLabel(date)}</div>
-                  {MoodIcon && (
-                    <div className="day-mood-icon">
-                      <MoodIcon size={48} color={isSelected ? 'white' : moodColor} />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              }}
+            >
+              New Entry
+            </Button>
           </div>
-          <IconButton 
-            aria-label="forward" 
-            onClick={handleNextWeek}
-            sx={{
-              width: 36,
-              height: 36,
-              border: '2px solid #667eea',
-              borderRadius: '50%',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              '&:hover': {
-                backgroundColor: '#667eea',
-                '& svg': {
-                  color: 'white'
-                }
-              }
-            }}
-          >
-            <ArrowForwardIosIcon sx={{ color: '#667eea', fontSize: 18 }} />
-          </IconButton>
-          {/* <button onClick={handleNextWeek} className="month-nav">→</button> */}
+
+          <div className="week-navigation">
+            <IconButton onClick={handlePrevWeek} size="small" sx={{ color: '#667eea' }}>
+              <ChevronLeft />
+            </IconButton>
+            <IconButton onClick={handleToday} size="small" sx={{ color: '#667eea' }}>
+              <Today />
+            </IconButton>
+            <IconButton onClick={handleNextWeek} size="small" sx={{ color: '#667eea' }}>
+              <ChevronRight />
+            </IconButton>
+          </div>
+
+          <div className="entries-list">
+            {filteredEntries.length === 0 ? (
+              <div className="no-entries">
+                <p>No entries this week.</p>
+                <p>Click "New Entry" to start!</p>
+              </div>
+            ) : (
+              filteredEntries.map((entry) => {
+                const moodData = entry.mood ? getMoodIcon(entry.mood) : null;
+                const MoodIcon = moodData?.icon;
+                const hasContent = entry.text && entry.text.trim().length > 0;
+                
+                return (
+                  <div
+                    key={entry.date}
+                    className={`entry-item ${selectedEntry?.date === entry.date ? 'active' : ''} ${!hasContent ? 'empty-entry' : ''}`}
+                    onClick={() => handleSelectEntry(entry)}
+                  >
+                    <div className="entry-date">
+                      {new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div className="entry-preview">
+                      {hasContent ? getPreview(entry.text) : 'No entry yet'}
+                    </div>
+                    {MoodIcon && (
+                      <div className="entry-mood-icon">
+                        <MoodIcon size={32} color={moodData.color} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
-        <div className="content-wrapper">
-          {/* <div className="left-panel">
-          </div> */}
-          {/* journal entry component (placeholder) */}
-          <div className="journal-entry-area">
-            
-          </div>
+        <div className="journal-content">
+          {selectedEntry ? (
+            <div className={`entry-display journal-page-container ${isFlipping ? 'flipping' : ''}`}>
+              <div className="journal-entry-paper">
+                <div className="journal-page-lines"></div>
+                <div className="entry-header">
+                  <h1>{formatDisplayDate(selectedEntry.date)}</h1>
+                  {!editMode && (
+                    <IconButton onClick={() => setEditMode(true)} sx={{ color: '#667eea' }}>
+                      <Edit />
+                    </IconButton>
+                  )}
+                </div>
 
-          {/* highlighters */}
-          <div className="right-panel">
+                {editMode ? (
+                  <div className="edit-mode">
+                    <textarea
+                      className="journal-textarea"
+                      value={journalText}
+                      onChange={(e) => setJournalText(e.target.value)}
+                      placeholder="Write your thoughts here..."
+                      autoFocus
+                    />
+                    <div className="edit-actions">
+                      <IconButton onClick={handleSaveEntry} sx={{ color: '#000' }}>
+                        <Save />
+                      </IconButton>
+                      <IconButton onClick={handleCancelEdit} sx={{ color: '#757575' }}>
+                        <Close />
+                      </IconButton>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="entry-text">
+                    {selectedEntry.text || 'No content yet. Click "Edit" to add some!'}
+                  </div>
+                )}
+
+                {selectedEntry.updatedAt && (
+                  <div className="entry-meta">
+                    Last updated: {new Date(selectedEntry.updatedAt).toLocaleString()}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="no-selection">
+              <div className="no-selection-content">
+                <h2>Welcome to your Journal</h2>
+                <p>Select an entry from the list or create a new one to get started.</p>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={handleNewEntry}
+                  size="large"
+                  sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: '16px',
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)'
+                    }
+                  }}
+                >
+                  Create Your First Entry
+                </Button>
+              </div>
+              <HappyGhost className="ghost-animation" />
+            </div>
+          )}
+        </div>
+
+        {editMode && selectedEntry && (
+          <div className="mood-sidebar">
             <h3>Today's Mood:</h3>
-            <div className="mood-highlighters">
-              {moods.map((mood) => {
-                const IconComponent = mood.icon;
+            <div className="mood-options">
+              {moods.slice(0, -1).map((mood) => {
+                const MoodIconComponent = mood.icon;
                 return (
                   <div
                     key={mood.name}
-                    className={`mood-highlighter ${selectedMood === mood.name ? 'selected' : ''} ${mood.name === 'noface' ? 'noface-mood' : ''}`}
-                    style={{ '--mood-color': mood.color }}
+                    className={`mood-option ${selectedMood === mood.name ? 'selected' : ''}`}
                     onClick={() => handleMoodSelect(mood.name)}
-                    title={mood.label}
                   >
-                    <IconComponent size={28} color={mood.color} />
+                    <div className="mood-icon-wrapper">
+                      <MoodIconComponent size={40} color={mood.color} />
+                    </div>
                     <span className="mood-label">{mood.label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
-        
+        )}
       </div>
     </div>
   );
