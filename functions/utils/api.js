@@ -1,0 +1,179 @@
+// functions/utils/api.js
+// OpenRouter/Gemini wrapper for Cloudflare Workers
+// Compatible with Workers runtime (no node-fetch needed - uses native fetch)
+
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL_NAME = "google/gemini-2.5-flash";
+const SEPARATOR = "|";
+
+/**
+ * Call OpenRouter API (uses native fetch in Workers)
+ */
+export async function askOpenRouter(prompt, apiKey, opts = {}) {
+  if (!apiKey) {
+    throw new Error("OpenRouter API key is required");
+  }
+
+  const body = {
+    model: MODEL_NAME,
+    messages: [{ role: "user", content: prompt }],
+    ...opts,
+  };
+
+  const res = await fetch(OPENROUTER_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`OpenRouter error ${res.status}: ${txt}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content ?? "";
+  return content;
+}
+
+/**
+ * Helper: Call LLM with retries
+ */
+export async function callLLMWithRetry(prompt, apiKey, retries = 2) {
+  let lastErr;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const out = await askOpenRouter(prompt, apiKey);
+      return out;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`LLM call error, retry ${i}:`, err.message || err);
+      await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
+/* ---------------------------
+   Prompt templates
+   --------------------------- */
+
+/**
+ * Extract options from user prompt
+ */
+export function buildExtractOptionsPrompt(userPrompt) {
+  return [
+    `Extract the options the user is deciding between from this prompt.`,
+    `Return ONE LINE only containing the options separated by the pipe character ' ${SEPARATOR} ' and nothing else.`,
+    `If you can only find two main options, return exactly "optionA ${SEPARATOR} optionB".`,
+    `User prompt:`,
+    `---`,
+    userPrompt,
+    `---`,
+    `Output example: "biking to work ${SEPARATOR} driving to work"`,
+  ].join("\n");
+}
+
+/**
+ * Generate comparison categories
+ */
+export function buildExtractCategoriesPrompt(userPrompt, optionsArray) {
+  return [
+    `Given this user's decision prompt and the two options, suggest 3-7 relevant comparison categories.`,
+    `Return ONE LINE only containing categories separated by the pipe ' ${SEPARATOR} ' and nothing else.`,
+    `Do NOT add explanation text.`,
+    `User prompt:`,
+    `---`,
+    userPrompt,
+    `---`,
+    `Options:`,
+    optionsArray.map((o) => `- ${o}`).join("\n"),
+    `Output example: "cost ${SEPARATOR} time ${SEPARATOR} safety"`,
+  ].join("\n");
+}
+
+/**
+ * Score each option per category
+ */
+export function buildScoreOptionsPrompt(userPrompt, optionsArray, categoriesArray) {
+  const cats = categoriesArray.join(", ");
+  return [
+    `For this decision, score each option for each category on a 1-10 scale (integers).`,
+    `Return ONLY lines in the format:`,
+    `OPTION_TEXT: score1,score2,score3`,
+    `Where score1 corresponds to the first category, score2 to the second, etc.`,
+    `Do NOT provide extra commentary.`,
+    `Categories (in order): ${cats}`,
+    `User prompt:`,
+    `---`,
+    userPrompt,
+    `---`,
+    `Options:`,
+    optionsArray.map((o) => `- ${o}`).join("\n"),
+    `Example output:`,
+    `biking to work: 9,7,10`,
+    `driving to work: 3,8,4`,
+  ].join("\n");
+}
+
+/**
+ * Generate final explanation
+ */
+export function buildFinalExplanationPrompt(promptText, optionsArray, categoriesArray, computedScores) {
+  const scoreLines = Object.entries(computedScores)
+    .map(([opt, sc]) => `${opt}: ${Number(sc).toFixed(2)}`)
+    .join("\n");
+
+  return [
+    `You are given the user's original prompt and the numeric final scores for each option.`,
+    `Provide a concise, human-facing explanation (2-4 short paragraphs) of WHY the top-scoring option is the better choice, referencing the categories when helpful.`,
+    `Be factual and constructive. Do NOT invent facts about real-world specifics; focus on the categories and scores.`,
+    `Original prompt:`,
+    `---`,
+    promptText,
+    `---`,
+    `Categories: ${categoriesArray.join(", ")}`,
+    `Final scores:`,
+    scoreLines,
+    `Output: Plain explanatory text only.`,
+  ].join("\n");
+}
+
+/* ---------------------------
+   Parsers
+   --------------------------- */
+
+/**
+ * Parse pipe-separated line into array
+ */
+export function parsePipeSeparatedLine(line) {
+  if (!line || typeof line !== "string") return [];
+  return line
+    .split(SEPARATOR)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Parse multi-line rating output
+ * Returns: { "<option>": [num, num, ...], ... }
+ */
+export function parseRatingsLines(text) {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const out = {};
+
+  for (const line of lines) {
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const option = line.slice(0, idx).trim();
+    const rest = line.slice(idx + 1).trim();
+    const nums = rest.split(",").map((n) => Number(n.trim())).filter((n) => !Number.isNaN(n));
+    if (option && nums.length) {
+      out[option] = nums;
+    }
+  }
+  return out;
+}

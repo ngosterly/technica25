@@ -1,12 +1,12 @@
 // db.js
-// Firebase Admin initialization and small helpers.
+// Firebase Admin initialization and database helpers
 
 import admin from "firebase-admin";
 import fs from "fs";
 
-const SERVICE_ACCOUNT_PATH = process.env.SERVICE_ACCOUNT_PATH; // optional
-const FIREBASE_ADMIN_JSON = process.env.FIREBASE_ADMIN_JSON;   // optional (full JSON string)
-const FIREBASE_DB_URL = process.env.FIREBASE_DB_URL; // e.g. https://...firebaseio.com
+const SERVICE_ACCOUNT_PATH = process.env.SERVICE_ACCOUNT_PATH;
+const FIREBASE_ADMIN_JSON = process.env.FIREBASE_ADMIN_JSON;
+const FIREBASE_DB_URL = process.env.FIREBASE_DB_URL;
 
 if (!FIREBASE_DB_URL) {
   throw new Error("Set FIREBASE_DB_URL env var to your realtime DB URL.");
@@ -33,6 +33,7 @@ function initApp() {
   });
 
   appInitialized = true;
+  console.log("✓ Firebase initialized");
 }
 
 export function getDatabase() {
@@ -41,29 +42,66 @@ export function getDatabase() {
 }
 
 /**
- * Write final user decision object under users/{uid}
- * Structure:
- * users/{uid} = {
+ * Write complete user decision to database
+ * Structure at users/{uid}:
+ * {
  *   prompt: string,
- *   scores: { "<option>": number, ... },
- *   result: string,
+ *   options: string[],
+ *   categories: string[],
+ *   weights: { [category]: number },  // normalized weights
+ *   scores: { [option]: number },      // final scores 0-100
+ *   result: string,                    // AI explanation
  *   timestamp: number
  * }
  */
-export async function writeUserDecision(uid, { prompt, scores, result }) {
+export async function writeUserDecision(uid, data) {
   const db = getDatabase();
   const ref = db.ref(`users/${uid}`);
+  
   const payload = {
-    prompt,
-    scores,
-    result,
+    prompt: data.prompt,
+    options: data.options || [],
+    categories: data.categories || [],
+    weights: data.weights || {},
+    scores: data.scores || {},
+    result: data.result || "",
     timestamp: Date.now(),
   };
+
   await ref.set(payload);
+  console.log(`✓ Saved decision for user ${uid.slice(0, 8)}...`);
+  
   return payload;
 }
 
-/** Generic helpers if needed */
+/**
+ * Read user decision from database
+ */
+export async function readUserDecision(uid) {
+  const db = getDatabase();
+  const snapshot = await db.ref(`users/${uid}`).get();
+  return snapshot.val();
+}
+
+/**
+ * Get all decisions (for admin/analytics)
+ */
+export async function getAllDecisions() {
+  const db = getDatabase();
+  const snapshot = await db.ref('users').get();
+  return snapshot.val();
+}
+
+/**
+ * Delete user decision
+ */
+export async function deleteUserDecision(uid) {
+  const db = getDatabase();
+  await db.ref(`users/${uid}`).remove();
+  console.log(`✓ Deleted decision for user ${uid}`);
+}
+
+/** Generic helpers */
 export async function writePath(path, value) {
   const db = getDatabase();
   await db.ref(path).set(value);

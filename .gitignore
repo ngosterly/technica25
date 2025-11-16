@@ -25,7 +25,13 @@ dist-ssr
 
 #Env variables
 .env
+.env.*
+.dev.vars
 .venv/
 venv
 __pycache__/
 decisionera-67322-firebase-adminsdk-fbsvc-0e85f9d3bf.json
+
+# Cloudflare
+.wrangler/
+wrangler.toml

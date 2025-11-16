@@ -9,50 +9,59 @@ const STEPS = {
   SHOW_RESULT: "show_result",
 };
 
-export default function DecisionPage() {
+export default function DecisionPage({ userId }) {
+  // Use provided userId instead of generating UUID
+  const uid = userId || crypto.randomUUID(); // Fallback for testing
+  
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: "bot",
-      text:
-        "Hello! I'm here to help you make a thoughtful decision. What are you deciding between today?",
+      text: "Hello! I'm here to help you make a thoughtful decision. What are you deciding between today?",
     },
   ]);
 
   const [input, setInput] = useState("");
   const [step, setStep] = useState(STEPS.ASK_QUESTION);
 
-  const [decision, setDecision] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [options, setOptions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [weights, setWeights] = useState({});
   const [ratings, setRatings] = useState({});
+  const [finalResult, setFinalResult] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
 
-  const [includeJournal, setIncludeJournal] = useState(false);
-
-  // Hardcoded options for now
-  const [options] = useState(["Scotland", "Korea"]);
-
   /* -------------------------------------------------------
-      BOT RESPONSE WITH TYPING ANIMATION
+      API CALL HELPER (silently fails)
   -------------------------------------------------------*/
-  function botRespond(text, delay = 3000) {
-    setIsTyping(true);
-
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        { id: prev.length + 1, type: "bot", text },
-      ]);
-    }, delay);
+  async function callAPI(endpoint, body) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "API request failed");
+      }
+      
+      return data;
+    } catch (err) {
+      console.error("API Error:", err);
+      // Silently fail - return null
+      return null;
+    }
   }
 
   /* -------------------------------------------------------
-     SEND BUTTON HANDLER (only active in ASK_QUESTION)
+     STEP 1: EXTRACT OPTIONS FROM USER PROMPT
   -------------------------------------------------------*/
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     if (step === STEPS.ASK_QUESTION) {
@@ -63,47 +72,108 @@ export default function DecisionPage() {
       };
 
       setMessages((prev) => [...prev, userMessage]);
-      setDecision(input);
+      setPrompt(input);
       setInput("");
-
-      const suggested = ["Cost", "Time", "Culture", "Safety", "Weather"];
-
-      // Show bot typing bubble first
       setIsTyping(true);
+      setStep(null);
 
-      setIsTyping(true);    
-      setStep(null); // temporarily hide UI
+      // Call API to extract options
+      const data = await callAPI("/api/1-extract-options", {
+        uid: uid,
+        prompt: input,
+      });
 
-      setTimeout(() => {
+      if (!data || !data.options || data.options.length === 0) {
+        // Silently fail - show generic message
         setIsTyping(false);
-
-        setMessages(prev => [
+        setMessages((prev) => [
           ...prev,
           {
             id: prev.length + 1,
             type: "bot",
-            text:
-              "Thanks for sharing that. Based on your decision, here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'"
-          }
+            text: "I'm having trouble understanding. Could you rephrase your decision?",
+          },
         ]);
+        setStep(STEPS.ASK_QUESTION);
+        return;
+      }
 
-        setCategories([
-          "Cost",
-          "Time",
-          "Culture",
-          "Safety",
-          "Weather",
-        ]);
+      console.log("Extracted options:", data);
+      setOptions(data.options);
 
-        setStep(STEPS.EDIT_CATEGORIES);
-      }, 3000);  // <-- typing delay
+      // Now extract categories
+      const categoriesData = await callAPI("/api/2-extract-categories", {
+        uid: uid,
+        prompt: input,
+        options: data.options,
+      });
 
+      console.log("Extracted categories:", categoriesData);
+      
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          type: "bot",
+          text: `I see you're deciding between ${data.options.join(" and ")}. Here are some categories you might consider. You can edit them freely. When you're ready, click 'Ready to continue.'`,
+        },
+      ]);
+
+      setCategories(categoriesData?.categories || ["Cost", "Time", "Quality"]);
+      
+      // Initialize default weights
+      const defaultWeights = {};
+      (categoriesData?.categories || []).forEach(cat => {
+        defaultWeights[cat] = 3;
+      });
+      setWeights(defaultWeights);
+
+      setStep(STEPS.EDIT_CATEGORIES);
     }
   };
 
   /* -------------------------------------------------------
-     CATEGORY EDITING STEP
+     STEP 2: EDIT CATEGORIES
   -------------------------------------------------------*/
+  const handleCategoriesReady = async () => {
+    setIsTyping(true);
+    setStep(null);
+
+    // Get AI ratings for the options based on categories
+    const ratingsData = await callAPI("/api/3-score-options", {
+      uid: uid,
+      prompt: prompt,
+      options: options,
+      categories: categories,
+    });
+
+    console.log("AI Ratings:", ratingsData);
+
+    // Convert aiRatings format to our ratings state format
+    const convertedRatings = {};
+    categories.forEach(cat => {
+      convertedRatings[cat] = {};
+      options.forEach(opt => {
+        const optionRatings = ratingsData?.aiRatings?.[opt] || {};
+        convertedRatings[cat][opt] = optionRatings[cat] || 3;
+      });
+    });
+
+    setRatings(convertedRatings);
+
+    setIsTyping(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        type: "bot",
+        text: "Great! Now tell me how important each category is to you on a scale from 1 to 5.",
+      },
+    ]);
+    setStep(STEPS.SET_WEIGHTS);
+  };
+
   const renderCategoryEditor = () => (
     <div className="chat-section-bubble">
       <h3>Suggested Categories</h3>
@@ -114,9 +184,16 @@ export default function DecisionPage() {
             <span>{cat}</span>
             <button
               className="category-remove"
-              onClick={() =>
-                setCategories((prev) => prev.filter((_, i) => i !== idx))
-              }
+              onClick={() => {
+                const catToRemove = cat;
+                setCategories((prev) => prev.filter((_, i) => i !== idx));
+                // Remove weight for removed category
+                setWeights((prev) => {
+                  const newWeights = { ...prev };
+                  delete newWeights[catToRemove];
+                  return newWeights;
+                });
+              }}
             >
               ✕
             </button>
@@ -130,11 +207,23 @@ export default function DecisionPage() {
           placeholder="Add your own category…"
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && newCategory.trim()) {
+              const catToAdd = newCategory.trim();
+              setCategories((prev) => [...prev, catToAdd]);
+              // Initialize weight for new category
+              setWeights((prev) => ({ ...prev, [catToAdd]: 3 }));
+              setNewCategory("");
+            }
+          }}
         />
         <button
           onClick={() => {
             if (!newCategory.trim()) return;
-            setCategories((prev) => [...prev, newCategory.trim()]);
+            const catToAdd = newCategory.trim();
+            setCategories((prev) => [...prev, catToAdd]);
+            // Initialize weight for new category
+            setWeights((prev) => ({ ...prev, [catToAdd]: 3 }));
             setNewCategory("");
           }}
         >
@@ -144,19 +233,8 @@ export default function DecisionPage() {
 
       <button
         className="primary-button"
-        onClick={() => {
-          setIsTyping(true);
-          setStep(null); // temporarily hide next UI
-
-          setTimeout(() => {
-            setIsTyping(false);
-            setMessages(prev => [
-              ...prev,
-              { id: prev.length + 1, type: "bot", text: "Great! Now tell me how important each category is to you on a scale from 1 to 5." }
-            ]);
-            setStep(STEPS.SET_WEIGHTS);
-          }, 3000);
-        }}
+        onClick={handleCategoriesReady}
+        disabled={categories.length === 0}
       >
         Ready to continue
       </button>
@@ -164,12 +242,11 @@ export default function DecisionPage() {
   );
 
   /* -------------------------------------------------------
-     CATEGORY IMPORTANCE SLIDERS (1–5)
+     STEP 3: SET WEIGHTS
   -------------------------------------------------------*/
   const renderWeightsStep = () => (
     <div className="chat-section-bubble">
       <h3>How important is each category?</h3>
-
       <p className="helper-text">Rate importance from 1–5</p>
 
       <div className="weights-grid">
@@ -212,12 +289,16 @@ export default function DecisionPage() {
 
           setTimeout(() => {
             setIsTyping(false);
-            setMessages(prev => [
+            setMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, type: "bot", text: "Perfect. Next, we'll compare your options in each category." }
+              {
+                id: prev.length + 1,
+                type: "bot",
+                text: "Perfect. I've already analyzed your options. You can adjust the ratings if you'd like.",
+              },
             ]);
             setStep(STEPS.RATE_OPTIONS);
-          }, 3000);
+          }, 1500);
         }}
       >
         Ready to continue
@@ -226,12 +307,14 @@ export default function DecisionPage() {
   );
 
   /* -------------------------------------------------------
-     RATE OPTIONS (1–5 sliders)
+     STEP 4: RATE OPTIONS (with AI pre-filled ratings)
   -------------------------------------------------------*/
   const renderRatingsStep = () => (
     <div className="chat-section-bubble">
-      <h3>Rate Each Category</h3>
-      <p className="helper-text">Rate each option from 1–5</p>
+      <h3>Review & Adjust Ratings</h3>
+      <p className="helper-text">
+        I've rated each option for you. Feel free to adjust from 1–5.
+      </p>
 
       <div className="ratings-table">
         <div className="ratings-header">
@@ -279,83 +362,161 @@ export default function DecisionPage() {
 
       <button
         className="primary-button"
-        onClick={() => {
-          setIsTyping(true);
-          setStep(null);
-
-          setTimeout(() => {
-            setIsTyping(false);
-            setMessages(prev => [
-              ...prev,
-              { id: prev.length + 1, type: "bot", text: "Great! Let me calculate which option is best for you..." }
-            ]);
-            setStep(STEPS.SHOW_RESULT);
-          }, 3000);
-        }}
-
+        onClick={handleFinalize}
       >
-        Ready to continue
+        Calculate Final Result
       </button>
     </div>
   );
 
   /* -------------------------------------------------------
-     RESULTS
+     STEP 5: FINALIZE & GET AI EXPLANATION
   -------------------------------------------------------*/
-  const calculateResults = () => {
-    const optionScores = {};
+  const handleFinalize = async () => {
+    setIsTyping(true);
+    setStep(null);
 
+    // Convert ratings back to the format the backend expects
+    const convertedRatings = {};
+    options.forEach(opt => {
+      convertedRatings[opt] = {};
+      categories.forEach(cat => {
+        convertedRatings[opt][cat] = ratings[cat]?.[opt] || 3;
+      });
+    });
+
+    const result = await callAPI("/api/4-finalize-result", {
+      uid: uid,
+      prompt: prompt,
+      options: options,
+      categories: categories,
+      weights: weights,
+      ratings: convertedRatings,
+    });
+
+    console.log("Final result:", result);
+
+    if (!result) {
+      // Silently calculate locally if API fails
+      const localScores = calculateLocalScores();
+      setFinalResult({
+        saved: {
+          scores: localScores,
+          result: "Based on your ratings and priorities, here's how the options compare."
+        },
+        explanation: "Based on your ratings and priorities, here's how the options compare."
+      });
+    } else {
+      setFinalResult(result);
+    }
+
+    setIsTyping(false);
+    
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        type: "bot",
+        text: "I've calculated the results based on your priorities!",
+      },
+    ]);
+    
+    setStep(STEPS.SHOW_RESULT);
+  };
+
+  /* -------------------------------------------------------
+     LOCAL SCORE CALCULATION (fallback)
+  -------------------------------------------------------*/
+  const calculateLocalScores = () => {
+    const optionScores = {};
+    
+    // Normalize weights
+    const totalWeight = Object.values(weights).reduce((s, w) => s + w, 0) || 1;
+    
     options.forEach((opt) => {
       let total = 0;
-
       categories.forEach((cat) => {
-        const weight = weights[cat] ?? 0;
-        const rating = ratings[cat]?.[opt] ?? 0;
+        const weight = (weights[cat] || 0) / totalWeight;
+        const rating = ratings[cat]?.[opt] || 0;
         total += weight * rating;
       });
-
-      optionScores[opt] = total;
+      // Scale to 0-100
+      optionScores[opt] = Number(((total / 5) * 100).toFixed(2));
     });
 
     return optionScores;
   };
 
+  /* -------------------------------------------------------
+     STEP 6: SHOW RESULTS
+  -------------------------------------------------------*/
   const renderResults = () => {
-    const scores = calculateResults();
-    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    if (!finalResult) return null;
 
-    const [bestOption, bestScore] = sorted[0];
-    const [secondOption, secondScore] = sorted[1];
+    const scores = finalResult.saved.scores;
+    const explanation = finalResult.explanation;
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
     return (
       <div className="chat-section-bubble">
         <h3>The Best Option</h3>
 
-        <p>Based on your priorities and ratings, the better choice is:</p>
+        <p>Based on your priorities and ratings, here's what I found:</p>
 
         <div className="best-result-box">
-          <strong>{bestOption}</strong>
-          <span className="score-tag">{bestScore.toFixed(1)}</span>
+          <strong>{sorted[0][0]}</strong>
+          <span className="score-tag">{sorted[0][1].toFixed(1)}</span>
         </div>
 
-        <p style={{ marginTop: "1rem" }}>
-          Here’s how the final scores compared:
-        </p>
+        <p style={{ marginTop: "1rem" }}>Here's how the final scores compared:</p>
 
         <div className="scores-list">
-          <div className="score-row">
-            <span>{bestOption}</span>
-            <span>{bestScore.toFixed(1)}</span>
-          </div>
-          <div className="score-row">
-            <span>{secondOption}</span>
-            <span>{secondScore.toFixed(1)}</span>
-          </div>
+          {sorted.map(([option, score]) => (
+            <div key={option} className="score-row">
+              <span>{option}</span>
+              <span>{score.toFixed(1)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ 
+          marginTop: "1.5rem", 
+          padding: "1rem", 
+          background: "#f8f9fa", 
+          borderRadius: "8px",
+          lineHeight: "1.6"
+        }}>
+          <h4 style={{ marginTop: 0 }}>Why this choice?</h4>
+          <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{explanation}</p>
         </div>
 
         <p className="helper-text" style={{ marginTop: "1rem" }}>
           This score represents (importance × rating) summed across all categories.
         </p>
+
+        <button
+          className="primary-button"
+          style={{ marginTop: "1rem" }}
+          onClick={() => {
+            // Reset for new decision
+            setMessages([
+              {
+                id: 1,
+                type: "bot",
+                text: "Would you like help with another decision?",
+              },
+            ]);
+            setPrompt("");
+            setOptions([]);
+            setCategories([]);
+            setWeights({});
+            setRatings({});
+            setFinalResult(null);
+            setStep(STEPS.ASK_QUESTION);
+          }}
+        >
+          Make Another Decision
+        </button>
       </div>
     );
   };
@@ -372,7 +533,6 @@ export default function DecisionPage() {
         </div>
 
         <div className="messages-container">
-          {/* Typing bubble always appears at bottom */}
           {messages.map((msg) => (
             <div key={msg.id} className={`message ${msg.type}`}>
               <div className="message-bubble">{msg.text}</div>
@@ -393,7 +553,6 @@ export default function DecisionPage() {
           {step === STEPS.SHOW_RESULT && renderResults()}
         </div>
 
-        {/* Input bar only visible during step 1 */}
         {step === STEPS.ASK_QUESTION && (
           <div className="input-container">
             <input
@@ -403,10 +562,15 @@ export default function DecisionPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              disabled={isTyping}
             />
 
-            <button className="send-button" onClick={handleSend}>
-              Send
+            <button 
+              className="send-button" 
+              onClick={handleSend}
+              disabled={isTyping || !input.trim()}
+            >
+              {isTyping ? "..." : "Send"}
             </button>
           </div>
         )}
@@ -414,6 +578,3 @@ export default function DecisionPage() {
     </div>
   );
 }
-
-
-

@@ -1,0 +1,9 @@
+{
+  "name": "decisionera-functions",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Cloudflare Workers functions for Decisionera",
+  "dependencies": {
+    "firebase-admin": "^13.6.0"
+  }
+}
