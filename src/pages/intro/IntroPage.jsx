@@ -214,7 +214,7 @@ const IntroPage = () => {
           <h2>Ready to Start?</h2>
           <p>Take the first step toward clearer, more confident decision-making.</p>
           <div className="cta-buttons">
-            <Link to="/DecisionPage" className="cta-button-primary">
+            <Link to="/decision" className="cta-button-primary">
               Try the Decision Maker
             </Link>
             <Link to="/journal" className="cta-button-secondary">
