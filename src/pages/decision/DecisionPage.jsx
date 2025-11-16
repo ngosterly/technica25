@@ -58,7 +58,7 @@ export default function DecisionPage() {
     let suggestedCategories = [];
 
     try {
-      const aiResponse = await askGemini(userText);
+      const aiResponse = await askGemini(userText, currentUser?.uid);
       console.log("🔥 AI returned response:", aiResponse);
       console.log("🔍 Response type:", typeof aiResponse);
       console.log("🔍 Options is array?", Array.isArray(aiResponse.options));

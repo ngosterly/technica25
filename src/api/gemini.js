@@ -1,6 +1,7 @@
-export async function askGemini(prompt) {
+export async function askGemini(prompt, userId = null) {
   try {
     console.log("🤖 Sending prompt to AI:", prompt);
+    console.log("👤 User ID:", userId);
 
     // Enhanced prompt to extract both options and categories
     const enhancedPrompt = `Analyze this decision question and extract the two options being compared and suggest relevant categories.
@@ -14,10 +15,21 @@ Example:
 Question: "Should I buy a house or rent an apartment?"
 Response: {"options": ["Buy a house", "Rent an apartment"], "categories": ["Cost", "Flexibility", "Long-term Investment", "Maintenance", "Location"]}`;
 
+    const requestBody = {
+      prompt: enhancedPrompt
+    };
+
+    // Include userId if provided
+    if (userId) {
+      requestBody.userId = userId;
+    }
+
+    console.log("📤 Request body:", requestBody);
+
     const res = await fetch("https://decisionera-ai.laylaaphipps.workers.dev/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: enhancedPrompt }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!res.ok) {
@@ -28,9 +40,19 @@ Response: {"options": ["Buy a house", "Rent an apartment"], "categories": ["Cost
     const data = await res.json();
     console.log("⚡ Worker raw response:", data);
 
+    // Check for error response
+    if (data.error) {
+      console.error("❌ Worker returned error:", data.error);
+      if (data.error.code === 401) {
+        console.error("❌ Authentication error - Worker requires valid user authentication");
+      }
+      return { options: [], categories: [] };
+    }
+
     let text = data?.choices?.[0]?.message?.content;
     if (!text) {
       console.error("❌ No content in AI response");
+      console.error("❌ Full response structure:", JSON.stringify(data, null, 2));
       return { options: [], categories: [] };
     }
 
