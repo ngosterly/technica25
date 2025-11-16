@@ -1,14 +1,16 @@
-// functions/api/4-finalize-result.js
-// Cloudflare Worker: Finalize result and save to database
+// functions/api/4-finalize-result-lite.js
+// Cloudflare Worker: Finalize result and save to database (LITE VERSION)
+// Uses Firebase REST API instead of Admin SDK
 
 import { buildFinalExplanationPrompt, callLLMWithRetry } from '../utils/api.js';
-// Use lightweight REST API version (no Node.js dependencies)
 import { writeUserDecision } from '../utils/db-lite.js';
 
 /**
  * POST /api/4-finalize-result
  * Body: { uid, prompt, options: [...], categories: [...], weights: {...}, ratings: {...} }
  * Response: { saved: {...}, explanation: string }
+ *
+ * LITE VERSION - No Firebase Admin SDK required
  */
 export async function onRequestPost(context) {
   try {
@@ -68,7 +70,7 @@ export async function onRequestPost(context) {
     );
     const explanationRaw = await callLLMWithRetry(explanationPrompt, apiKey);
 
-    // Save to database
+    // Save to database using lite REST API
     const saved = await writeUserDecision(context.env, uid, {
       prompt,
       options,

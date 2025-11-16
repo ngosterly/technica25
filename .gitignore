@@ -34,4 +34,4 @@ decisionera-67322-firebase-adminsdk-fbsvc-0e85f9d3bf.json
 
 # Cloudflare
 .wrangler/
-wrangler.toml
+# Note: wrangler.toml is NOT ignored - it's needed for deployment
