@@ -1,27 +1,51 @@
+# api.py
+import os
 import requests
+from dotenv import load_dotenv
 
-API_KEY = "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"
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
-def ask_openrouter(prompt):
-    url = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+MODEL_NAME = "google/gemini-2.5-flash"   # can make configurable
 
+
+# Low-level Gemini call
+
+def ask_gemini(prompt: str) -> str:
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
     }
 
     body = {
-        "model": "openai/gpt-4.1",   # You can change the model if desired
+        "model": MODEL_NAME,
         "messages": [
             {"role": "user", "content": prompt}
         ]
     }
 
-    response = requests.post(url, headers=headers, json=body)
+    response = requests.post(OPENROUTER_URL, headers=headers, json=body)
+    response.raise_for_status()
     data = response.json()
     return data["choices"][0]["message"]["content"]
 
 
-if __name__ == "__main__":
-    answer = ask_openrouter("Send me the numbers 1-10")
-    print("GPT says:", answer)
+# Prompt wrappers
+
+def build_prompt(text: str, type: str) -> str:
+    match type:
+        case "category":
+            wrapper = (
+                "Return only a comma-separated list of decision-making categories.\n"
+                "Example: 'cost,time,fun'\n\n"
+            )
+        case "rating":
+            wrapper = (
+                "Return only a comma-separated list of numeric scores.\n"
+                "Example: '1,8,10,6,3,10'\n\n"
+            )
+        case _:
+            wrapper = ""
+
+    return wrapper + text
