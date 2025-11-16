@@ -118,13 +118,6 @@ const JournalPage = () => {
             ))
           )}
         </div>
-
-        <div className="journal-cta">
-          <p>Want to use your journal entries to inform your decisions?</p>
-          <Link to="/chatbot" className="cta-button">
-            Go to Chatbot →
-          </Link>
-        </div>
       </div>
     </div>
   );
