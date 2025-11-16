@@ -1,0 +1,445 @@
+.calendar-page {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  padding: 2rem 3%;
+  width: 100%;
+  font-family: 'Raleway', sans-serif;
+}
+
+.calendar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e9ecef;
+}
+
+.calendar-header h2 {
+  color: #6b6ad7e2;
+  font-size: 1.8rem;
+  margin: 0;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+.month-nav {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #ffc4df;
+  color: #6b6ad7e2;
+  font-size: 1.5rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.month-nav:hover {
+  background: #ffc4df;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Mood Statistics */
+.mood-statistics {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e9ecef;
+}
+
+.mood-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.mood-statistics h3 {
+  color: #6b6ad7e2;
+  margin: 0;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+.mood-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.mood-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: transform 0.2s;
+  border: 1px solid #e9ecef;
+}
+
+.mood-stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.mood-stat-label {
+  flex: 1;
+  font-weight: 500;
+  color: #495057;
+}
+
+.mood-stat-percentage {
+  font-weight: 700;
+  color: #6b6ad7e2;
+  font-size: 1.1rem;
+}
+
+/* Calendar Grid */
+.calendar-grid-container {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e9ecef;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.weekday-label {
+  text-align: center;
+  font-weight: 700;
+  color: #6b6ad7e2;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
+  min-height: 80px;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  cursor: default;
+  border: 2px solid transparent;
+}
+
+.calendar-day:not(.empty):hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: #6b6ad7e2;
+}
+
+.calendar-day.today {
+  border: 3px solid #ffc4df;
+  font-weight: bold;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.calendar-day.has-data {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.day-number {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+.day-mood-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin: 0.25rem 0;
+}
+
+.day-indicators {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.day-mood-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-mood-indicator.clickable {
+  cursor: pointer;
+  transition: transform 0.2s;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.day-mood-indicator.clickable:hover {
+  transform: scale(1.15);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.day-mood-indicator.add-mood {
+  opacity: 0.5;
+}
+
+.day-mood-indicator.add-mood:hover {
+  opacity: 1;
+}
+
+.journal-indicator,
+.decision-indicator {
+  font-size: 0.9rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  color: #333;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #6b6ad7e2;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+  color: #6b6ad7e2;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.action-button {
+  padding: 1rem;
+  border: 2px solid #ffc4df;
+  background: white;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #333;
+}
+
+.action-button:hover {
+  background: #ffc4df;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.current-data {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #ffc4df;
+  color: #333;
+}
+
+.current-mood,
+.current-journal {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.current-mood:last-child,
+.current-journal:last-child {
+  margin-bottom: 0;
+}
+
+.mood-selector-modal {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.mood-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.mood-selector-header h3 {
+  margin: 0;
+  color: #6b6ad7e2;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 1.3rem;
+}
+
+.mood-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.mood-selector-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  border: 3px solid #e9ecef;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.mood-selector-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.mood-selector-item.selected {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.mood-selector-label {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #495057;
+  text-align: center;
+}
+
+
+.current-journal p {
+  margin: 0.5rem 0 0 0;
+  color: #495057;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .calendar-page {
+    padding: 1rem 2%;
+  }
+
+  .calendar-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .month-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .mood-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .calendar-day {
+    min-height: 60px;
+    padding: 0.35rem;
+  }
+
+  .day-number {
+    font-size: 0.8rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+}

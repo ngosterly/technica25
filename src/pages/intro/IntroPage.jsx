@@ -1,7 +1,37 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import './IntroPage.css';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import BalanceIcon from '@mui/icons-material/Balance';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import CodeIcon from '@mui/icons-material/Code';
+import DesignServicesIcon from '@mui/icons-material/DesignServices';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import PetsIcon from '@mui/icons-material/Pets';
+import MoodIcon from '@mui/icons-material/Mood';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { IconButton } from '@mui/material';
 
 const IntroPage = () => {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="intro-page">
       {/* hero section */}
@@ -9,7 +39,7 @@ const IntroPage = () => {
         <div className="hero-content">
           <h1 className="hero-title">Welcome to Decisionera</h1>
           <p className="hero-subtitle">
-            Making decisions shouldn't be overwhelming. We're here to help you navigate choices
+            Making decisions shouldn't be spooky. We're here to help you navigate choices
             with clarity, care, and confidence.
           </p>
           <Link to="/chatbot" className="cta-button-hero">
@@ -30,7 +60,7 @@ const IntroPage = () => {
           
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🧠</div>
+              <div className="feature-icon"><PsychologyIcon sx={{ fontSize: 60, color: '#6b6ad7e2' }} /></div>
               <h3>Mental Health First</h3>
               <p>
                 We prioritize your well-being by avoiding triggering language and considering
@@ -39,7 +69,7 @@ const IntroPage = () => {
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">⚖️</div>
+              <div className="feature-icon"><BalanceIcon sx={{ fontSize: 60, color: '#6b6ad7e2' }} /></div>
               <h3>Decision Matrix</h3>
               <p>
                 Our engineering decision matrix weighs and scales categories that matter to you,
@@ -48,7 +78,7 @@ const IntroPage = () => {
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">📔</div>
+              <div className="feature-icon"><MenuBookIcon sx={{ fontSize: 60, color: '#6b6ad7e2' }} /></div>
               <h3>Journal Integration</h3>
               <p>
                 Connect your journal entries with decision-making to provide context and
@@ -57,7 +87,7 @@ const IntroPage = () => {
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">🎯</div>
+              <div className="feature-icon"><TrackChangesIcon sx={{ fontSize: 60, color: '#6b6ad7e2' }} /></div>
               <h3>Personalized Categories</h3>
               <p>
                 Choose the categories that matter most to you, from regret likelihood to
@@ -69,13 +99,13 @@ const IntroPage = () => {
       </section>
 
       {/* about us section */}
-      <section id="about-section" className="about-section">
+      <section className="about-section">
         <div className="container">
           <h2>About Us</h2>
           <p className="about-text">
-            Decisionera was created with the understanding that decision-making can be
-            particularly challenging for those managing mental health concerns. We believe
-            that technology should empower, not overwhelm.
+            Decisionera was created at Technica 2025, the world's largest all-women and non-binary hackathon. 
+            We understand that decision-making can be particularly challenging for those managing mental health concerns. 
+            We believe that technology should empower, not overwhelm.
           </p>
           
           <div className="principles">
@@ -96,10 +126,10 @@ const IntroPage = () => {
             </div>
             
             <div className="principle">
-              <h4>Privacy Focused</h4>
+              <h4>Mood Tracking & Insights</h4>
               <p>
-                Your journal entries and decisions remain private. We don't store
-                conversations between sessions.
+                Track your daily moods with our intuitive mood tracker. Visualize emotional patterns 
+                over time and understand how your feelings influence your decision-making process.
               </p>
             </div>
           </div>
@@ -111,36 +141,68 @@ const IntroPage = () => {
         <div className="container">
           <h2>Meet the Team</h2>
           <p className="team-intro">
-            Built with care by developers who understand the importance of mental health
-            in technology.
+            Built at Technica 2025 by a team of passionate full-stack developers who understand 
+            the importance of mental health in technology.
           </p>
           
           <div className="team-grid">
             <div className="team-member">
-              <div className="member-placeholder">👩‍💻</div>
-              <h3>Developer Name</h3>
+              <div className="member-placeholder"><CodeIcon sx={{ fontSize: 80, color: '#6b6ad7e2' }} /></div>
+              <h3>Lilly Ngo</h3>
               <p className="member-role">Full Stack Developer</p>
               <p className="member-bio">
-                Passionate about creating accessible, mental health-conscious technology.
+                Creating empathetic tech solutions that bridge the gap between mental wellness and productivity.
               </p>
+              <div className="member-links">
+                <a href="https://www.linkedin.com/in/lillyn-g" target="_blank" rel="noopener noreferrer">
+                  <LinkedInIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
+                </a>
+              </div>
             </div>
             
             <div className="team-member">
-              <div className="member-placeholder">👨‍💻</div>
-              <h3>Developer Name</h3>
-              <p className="member-role">UX/UI Designer</p>
+              <div className="member-placeholder">
+                <DesignServicesIcon sx={{ fontSize: 80, color: '#6b6ad7e2' }} />
+                <PetsIcon sx={{ fontSize: 25, color: '#6b6ad7e2', position: 'absolute', marginLeft: '-5px', marginTop: '50px' }} />
+              </div>
+              <h3>Layla Phipps</h3>
+              <p className="member-role">Full Stack Developer</p>
               <p className="member-bio">
-                Focused on designing calming, intuitive interfaces that reduce stress.
+                Designing intuitive interfaces with a focus on user experience and emotional well-being.
               </p>
+              <div className="member-links">
+                <a href="https://www.linkedin.com/in/layla-phipps-281980341/" target="_blank" rel="noopener noreferrer">
+                  <LinkedInIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
+                </a>
+              </div>
             </div>
-            
+
             <div className="team-member">
-              <div className="member-placeholder">👩‍💻</div>
-              <h3>Developer Name</h3>
-              <p className="member-role">AI Integration</p>
+              <div className="member-placeholder"><DeveloperModeIcon sx={{ fontSize: 80, color: '#6b6ad7e2' }} /></div>
+              <h3>Tommy Brozek</h3>
+              <p className="member-role">Full Stack Developer</p>
               <p className="member-bio">
-                Specializing in responsible AI that prioritizes user well-being.
+                Building UI components and systems that prioritize accessibility and mental health support.
               </p>
+              <div className="member-links">
+                <a href="https://www.linkedin.com/in/tommy-brozek" target="_blank" rel="noopener noreferrer">
+                  <LinkedInIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
+                </a>
+              </div>
+            </div>
+        
+            <div className="team-member">
+              <div className="member-placeholder"><SmartToyIcon sx={{ fontSize: 80, color: '#6b6ad7e2' }} /></div>
+              <h3>Brennen Mccorison</h3>
+              <p className="member-role">Full Stack Developer</p>
+              <p className="member-bio">
+                Integrating AI thoughtfully to create supportive, user-centered decision-making tools.
+              </p>
+              <div className="member-links">
+                <a href="https://www.linkedin.com/in/brennen-mccorison-a68786267/" target="_blank" rel="noopener noreferrer">
+                  <LinkedInIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -159,8 +221,40 @@ const IntroPage = () => {
               Start Journaling
             </Link>
           </div>
+          <div className="github-section">
+            <a 
+              href="https://github.com/ngosterly/technica25" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="github-button"
+            >
+              <GitHubIcon sx={{ fontSize: 24, marginRight: '8px' }} />
+              View on GitHub
+            </a>
+          </div>
         </div>
       </section>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <IconButton
+          onClick={scrollToTop}
+          className="scroll-to-top"
+          sx={{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            backgroundColor: '#6b6ad7e2',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#a2b4f5',
+            },
+            zIndex: 1000,
+          }}
+        >
+          <KeyboardArrowUpIcon sx={{ fontSize: 30 }} />
+        </IconButton>
+      )}
     </div>
   );
 };

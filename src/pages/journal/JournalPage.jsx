@@ -1,123 +1,385 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { IconButton, Button } from '@mui/material';
+import { Edit, Save, Close, ChevronLeft, ChevronRight, Today, Add } from '@mui/icons-material';
+import { getAllEntries, saveEntry, getEntryByDate } from '../../utils/journalStorage';
+import { HappyFace, SadFace, MadFace, MehFace, NeutralFace, NoFace } from '../../components/MoodIcons';
+import HappyGhost from '../../components/HappyGhost';
 import './JournalPage.css';
 
 const JournalPage = () => {
-  const [entries, setEntries] = useState([
-    {
-      id: 1,
-      date: '2025-11-10',
-      title: 'Weekend Plans',
-      content: 'Trying to decide if I should go to the party or stay home...',
-      mood: 'thoughtful',
-      tags: ['social', 'self-care']
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [entries, setEntries] = useState([]);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [journalText, setJournalText] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [selectedMood, setSelectedMood] = useState(null);
+
+  const moods = [
+    { name: 'happy', color: '#FFD93D', label: 'Happy', icon: HappyFace },
+    { name: 'sad', color: '#6badcbff', label: 'Sad', icon: SadFace },
+    { name: 'mad', color: '#FF6B6B', label: 'Mad', icon: MadFace },
+    { name: 'meh', color: '#8ed88cff', label: 'Anxious', icon: MehFace },
+    { name: 'neutral', color: '#99cec5ff', label: 'Neutral', icon: NeutralFace },
+    { name: 'noface', color: '#e0e0e0', label: 'None', icon: NoFace }
+  ];
+
+  function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    return new Date(d.setDate(diff));
+  }
+
+  function getWeekEntries(weekStart) {
+    const week = [];
+    const start = new Date(weekStart);
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+      const entry = getEntryByDate(dateKey);
+      week.push({
+        date: dateKey,
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNum: date.getDate(),
+        ...entry
+      });
     }
-  ]);
-  const [showNewEntry, setShowNewEntry] = useState(false);
-  const [newEntry, setNewEntry] = useState({
-    title: '',
-    content: '',
-    mood: '',
-    tags: ''
-  });
+    return week;
+  }
 
-  const handleCreateEntry = () => {
-    if (!newEntry.title || !newEntry.content) return;
+  useEffect(() => {
+    loadAllEntries();
+    
+    // check if a date is specified in URL params
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      const entry = getEntryByDate(dateParam);
+      if (entry) {
+        setSelectedEntry({ date: dateParam, ...entry });
+        setJournalText(entry.text || '');
+      } else {
+        setCurrentDate(dateParam);
+        setSelectedEntry({ date: dateParam });
+        setEditMode(true);
+      }
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, currentWeekStart]);
 
-    const entry = {
-      id: entries.length + 1,
-      date: new Date().toISOString().split('T')[0],
-      title: newEntry.title,
-      content: newEntry.content,
-      mood: newEntry.mood || 'neutral',
-      tags: newEntry.tags.split(',').map(tag => tag.trim()).filter(Boolean)
-    };
-
-    setEntries([entry, ...entries]);
-    setNewEntry({ title: '', content: '', mood: '', tags: '' });
-    setShowNewEntry(false);
+  const loadAllEntries = () => {
+    const entriesMap = getAllEntries();
+    // convert to array and sort by date (newest first)
+    const entriesArray = Object.entries(entriesMap)
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    setEntries(entriesArray);
   };
+
+  const getFilteredEntriesByWeek = () => {
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    
+    // create all 7 days of the week, even if no entry exists
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(currentWeekStart);
+      date.setDate(date.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+      
+      // find an existing entry for this date
+      const existingEntry = entries.find(entry => entry.date === dateKey);
+      
+      weekDays.push({
+        date: dateKey,
+        text: existingEntry?.text || '',
+        mood: existingEntry?.mood || null,
+        updatedAt: existingEntry?.updatedAt || null
+      });
+    }
+    
+    return weekDays;
+  };
+
+  const handleSelectEntry = (entry) => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      setSelectedEntry(entry);
+      setJournalText(entry.text || '');
+      setSelectedMood(entry.mood || null);
+      setEditMode(false);
+      setIsFlipping(false);
+    }, 300);
+  };
+
+  const handleNewEntry = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const existingEntry = getEntryByDate(today);
+    
+    setCurrentDate(today);
+    setJournalText(existingEntry?.text || '');
+    setSelectedMood(existingEntry?.mood || null);
+    setSelectedEntry(existingEntry ? { date: today, ...existingEntry } : { date: today });
+    setEditMode(true);
+  };
+
+  const handleSaveEntry = () => {
+    if (!journalText.trim() && !selectedMood) {
+      alert('Please write something or select a mood before saving!');
+      return;
+    }
+
+    const existingEntry = getEntryByDate(currentDate) || {};
+    
+    saveEntry(currentDate, {
+      ...existingEntry,
+      text: journalText,
+      mood: selectedMood,
+      updatedAt: new Date().toISOString()
+    });
+
+    loadAllEntries();
+    setEditMode(false);
+    
+    // updating selected entry
+    const updatedEntry = getEntryByDate(currentDate);
+    setSelectedEntry({ date: currentDate, ...updatedEntry });
+  };
+
+  const handleMoodSelect = (moodName) => {
+    setSelectedMood(moodName === selectedMood ? null : moodName);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    if (selectedEntry) {
+      setJournalText(selectedEntry.text || '');
+    }
+  };
+
+  const formatDisplayDate = (dateString) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getPreview = (text) => {
+    if (!text) return 'No content';
+    return text.length > 150 ? text.substring(0, 150) + '...' : text;
+  };
+
+  const getMoodIcon = (moodName) => {
+    const mood = moods.find(m => m.name === moodName);
+    return mood ? { icon: mood.icon, color: mood.color } : null;
+  };
+
+  const handlePrevWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(newWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const handleNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(newWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const handleToday = () => {
+    setCurrentWeekStart(getWeekStart(new Date()));
+  };
+
+  const weekEntries = getWeekEntries(currentWeekStart);
+  const filteredEntries = getFilteredEntriesByWeek();
 
   return (
     <div className="journal-page">
       <div className="journal-container">
-        <div className="journal-header">
-          <h1>Your Journal</h1>
-          <p>Reflect on your thoughts and decisions in a safe space</p>
-          <button 
-            className="new-entry-button"
-            onClick={() => setShowNewEntry(!showNewEntry)}
-          >
-            {showNewEntry ? '× Cancel' : '+ New Entry'}
-          </button>
+        <div className="entries-sidebar">
+          <div className="sidebar-header">
+            <h2>Journal Entries</h2>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleNewEntry}
+              sx={{
+                width: '100%',
+                backgroundColor: 'white',
+                color: '#6b6ad7e2',
+                '&:hover': {
+                  backgroundColor: '#f8f9fa'
+                }
+              }}
+            >
+              New Entry
+            </Button>
+          </div>
+
+          <div className="week-navigation">
+            <IconButton onClick={handlePrevWeek} size="small" sx={{ color: '#6b6ad7e2' }}>
+              <ChevronLeft />
+            </IconButton>
+            <IconButton onClick={handleToday} size="small" sx={{ color: '#6b6ad7e2' }}>
+              <Today />
+            </IconButton>
+            <IconButton onClick={handleNextWeek} size="small" sx={{ color: '#6b6ad7e2' }}>
+              <ChevronRight />
+            </IconButton>
+          </div>
+
+          <div className="entries-list">
+            {filteredEntries.length === 0 ? (
+              <div className="no-entries">
+                <p>No entries this week.</p>
+                <p>Click "New Entry" to start!</p>
+              </div>
+            ) : (
+              filteredEntries.map((entry) => {
+                const moodData = entry.mood ? getMoodIcon(entry.mood) : null;
+                const MoodIcon = moodData?.icon;
+                const hasContent = entry.text && entry.text.trim().length > 0;
+                
+                return (
+                  <div
+                    key={entry.date}
+                    className={`entry-item ${selectedEntry?.date === entry.date ? 'active' : ''} ${!hasContent ? 'empty-entry' : ''}`}
+                    onClick={() => handleSelectEntry(entry)}
+                  >
+                    <div className="entry-date">
+                      {new Date(entry.date + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div className="entry-preview">
+                      {hasContent ? getPreview(entry.text) : 'No entry yet'}
+                    </div>
+                    {MoodIcon && (
+                      <div className="entry-mood-icon">
+                        <MoodIcon size={32} color={moodData.color} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
-        {showNewEntry && (
-          <div className="new-entry-form">
-            <input
-              type="text"
-              placeholder="Entry title..."
-              value={newEntry.title}
-              onChange={(e) => setNewEntry({...newEntry, title: e.target.value})}
-              className="entry-input"
-            />
-            <textarea
-              placeholder="What's on your mind?&#10;&#10;This is a safe space to explore your thoughts..."
-              value={newEntry.content}
-              onChange={(e) => setNewEntry({...newEntry, content: e.target.value})}
-              className="entry-textarea"
-              rows="8"
-            />
-            <div className="entry-meta">
-              <input
-                type="text"
-                placeholder="How are you feeling?"
-                value={newEntry.mood}
-                onChange={(e) => setNewEntry({...newEntry, mood: e.target.value})}
-                className="mood-input"
-              />
-              <input
-                type="text"
-                placeholder="Tags (comma separated)"
-                value={newEntry.tags}
-                onChange={(e) => setNewEntry({...newEntry, tags: e.target.value})}
-                className="tags-input"
-              />
-            </div>
-            <button onClick={handleCreateEntry} className="save-entry-button">
-              Save Entry
-            </button>
-          </div>
-        )}
-
-        <div className="entries-list">
-          {entries.length === 0 ? (
-            <div className="empty-state">
-              <p>No journal entries yet.</p>
-              <p>Start writing to track your thoughts and decisions!</p>
-            </div>
-          ) : (
-            entries.map(entry => (
-              <div key={entry.id} className="entry-card">
-                <div className="entry-header">
-                  <h3>{entry.title}</h3>
-                  <span className="entry-date">{entry.date}</span>
-                </div>
-                <p className="entry-content">{entry.content}</p>
-                <div className="entry-footer">
-                  {entry.mood && (
-                    <span className="mood-badge">{entry.mood}</span>
-                  )}
-                  <div className="tags">
-                    {entry.tags.map((tag, idx) => (
-                      <span key={idx} className="tag">#{tag}</span>
-                    ))}
+        <div className="journal-content">
+          {selectedEntry ? (
+            <div className={`flip-card ${isFlipping ? 'flipped' : ''}`}>
+              <div className="flip-card-inner">
+                {/* Front side - Journal entry */}
+                <div className="flip-card-front journal-entry-paper">
+                  <div className="journal-page-lines"></div>
+                  <div className="entry-header">
+                    <h1>{formatDisplayDate(selectedEntry.date)}</h1>
+                    {!editMode && (
+                      <IconButton onClick={() => setEditMode(true)} sx={{ color: '#6b6ad7e2' }}>
+                        <Edit />
+                      </IconButton>
+                    )}
                   </div>
+
+                  {editMode ? (
+                    <div className="edit-mode">
+                      <textarea
+                        className="journal-textarea"
+                        value={journalText}
+                        onChange={(e) => setJournalText(e.target.value)}
+                        placeholder="Write your thoughts here..."
+                        autoFocus
+                      />
+                      <div className="edit-actions">
+                        <IconButton onClick={handleSaveEntry} sx={{ color: '#000' }}>
+                          <Save />
+                        </IconButton>
+                        <IconButton onClick={handleCancelEdit} sx={{ color: '#757575' }}>
+                          <Close />
+                        </IconButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="entry-text">
+                      {selectedEntry.text || 'No content yet. Click "Edit" to add some!'}
+                    </div>
+                  )}
+
+                  {selectedEntry.updatedAt && (
+                    <div className="entry-meta">
+                      Last updated: {new Date(selectedEntry.updatedAt).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flip-card-back">
+                  <h1>{formatDisplayDate(selectedEntry.date)}</h1>
                 </div>
               </div>
-            ))
+            </div>
+          ) : (
+            <div className="no-selection">
+              <div className="no-selection-content">
+                <h2>Welcome to your Journal</h2>
+                <p>Select an entry from the list or create a new one to get started.</p>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={handleNewEntry}
+                  size="large"
+                  sx={{
+                    background: 'linear-gradient(135deg, #ffc4df 0%, #a2b4f5 100%)',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: '16px',
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)'
+                    }
+                  }}
+                >
+                  Create Your First Entry
+                </Button>
+              </div>
+              <HappyGhost className="ghost-animation" />
+            </div>
           )}
         </div>
+
+        {editMode && selectedEntry && (
+          <div className="mood-sidebar">
+            <h3>Today's Mood:</h3>
+            <div className="mood-options">
+              {moods.slice(0, -1).map((mood) => {
+                const MoodIconComponent = mood.icon;
+                return (
+                  <div
+                    key={mood.name}
+                    className={`mood-option ${selectedMood === mood.name ? 'selected' : ''}`}
+                    onClick={() => handleMoodSelect(mood.name)}
+                  >
+                    <div className="mood-icon-wrapper">
+                      <MoodIconComponent size={40} color={mood.color} />
+                    </div>
+                    <span className="mood-label">{mood.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
