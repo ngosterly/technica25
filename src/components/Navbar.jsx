@@ -35,8 +35,8 @@ const Navbar = () => {
           </li>
           
           <li className="nav-item">
-            <Link to="/chatbot" className={isActive('/chatbot')}>
-              Chatbot
+            <Link to="/decision" className={isActive('/decision')}>
+              Decision Maker
             </Link>
           </li>
           

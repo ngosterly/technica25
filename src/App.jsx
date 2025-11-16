@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import IntroPage from './pages/intro/IntroPage';
-import ChatbotPage from './pages/chatbot/ChatbotPage';
+import DecisionPage from './pages/decision/DecisionPage';
 import JournalPage from './pages/journal/JournalPage';
 import AuthPage from './pages/auth/authPage';
 import './App.css';
@@ -13,7 +13,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<IntroPage />} />
-          <Route path="/chatbot" element={<ChatbotPage />} />
+          <Route path="/decision" element={<DecisionPage />} />
           <Route path="/journal" element={<JournalPage />} />
           <Route path="/auth" element={<AuthPage />} />
         </Routes>
