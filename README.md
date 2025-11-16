@@ -1,27 +1,101 @@
-# technica25
+# Decisionera 🧠✨
 
-Personality / emotion music recommender — UI built with React + Vite.
+**Making decisions shouldn't be overwhelming.** Decisionera is a mental health-conscious decision-making platform that helps you navigate life's choices with clarity, care, and confidence.
 
-## About
+Built at **Technica 2025** — the world's largest all-women and non-binary hackathon.
 
-This repository (`technica25`) contains a React + Vite application used as the frontend for a personality/emotion-based music recommender prototype.
+## ☆ About
 
-## Template Information
+Decisionera combines AI-powered decision analysis with mood tracking and journaling to support your mental well-being while helping you make important decisions. We use a thoughtful, category-based approach that considers your unique needs, preferences, and mental health considerations.
 
-This project uses the React + Vite template which provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Key Features
 
-Currently, two official plugins are available:
+- **AI Decision Maker**: Interactive decision-making assistant that helps you evaluate choices using a customizable decision matrix
+- **Journal Integration**: Connect your daily thoughts with decision-making to provide context and track your emotional journey
+- **Mood Tracker**: Visual mood tracking with calendar integration to understand emotional patterns over time
+- **Personalized Categories**: Choose the decision factors that matter most to you — from regret likelihood to reversibility scores
+- **Mental Health First**: Safe language, anxiety-aware design, and privacy-focused architecture
 
-- `@vitejs/plugin-react` uses Babel (or oxc when used in rolldown-vite) for Fast Refresh
-- `@vitejs/plugin-react-swc` uses SWC for Fast Refresh
+## 🛠️ Tech Stack
 
-### React Compiler
+- **Frontend**: React 19.2.0 + Vite
+- **UI Library**: Material-UI (MUI) 7.3.5
+- **Routing**: React Router DOM 7.9.6
+- **Backend**: Firebase 12.6.0
+- **Styling**: Custom CSS with gradient themes
+- **Icons**: MUI Icons
 
-The React Compiler is not enabled in this template because of its impact on dev & build performance. To add it, see the React documentation: https://react.dev/learn/react-compiler/installation
+## Getting Started
 
-### Expanding the ESLint configuration
+### Prerequisites
 
-For production applications we recommend using TypeScript with type-aware lint rules enabled. See the Vite TS template for details on integrating TypeScript and `typescript-eslint`:
-https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ngosterly/technica25.git
+cd technica25/Decisionera
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+## 📱 Features Overview
+
+### Decision-Maker
+Engage with our AI assistant to analyze decisions through multiple customizable categories. The chatbot helps you weigh pros and cons while considering mental health factors like anxiety impact and stress levels.
+
+### Mood-Integrated Journaling
+Track your daily moods and journal entries in a beautifully designed interface. Features include:
+- Weekly entry pagination
+- Vintage paper-style journal pages with 3D flip animations
+- Mood icons (happy, sad, mad, meh, neutral) with visual calendar integration
+- Automatic saving and timestamp tracking
+
+### Calendar Visualization
+View your emotional journey over time with an interactive calendar that displays mood icons for each day. Click any day to navigate directly to your journal entry.
+
+## 🎨 Design Philosophy
+
+- **Calming Color Palette**: Pink-to-blue gradients (#ffc4df to #a2b4f5) designed to reduce stress
+- **Intuitive Navigation**: Clean, minimal interface with clear pathways
+- **Accessibility First**: High contrast text, clear typography, and responsive design
+- **Safe Language**: Avoiding triggering words, focusing on growth and learning
+
+## 👥 Team
+
+Built by passionate full-stack developers who understand the importance of mental health in technology:
+
+- **Lilly Ngo** - Full Stack Developer
+- **Layla Phipps** - Full Stack Developer  
+- **Tommy Brozek** - Full Stack Developer
+- **Brennen Mccorison** - Full Stack Developer
+
+## 🤝 Contributing
+
+This project was created for Technica 2025. While it's currently a hackathon project, we welcome feedback and suggestions!
+
+## 📄 License
+
+This project is part of the Technica 2025 hackathon submission.
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/ngosterly/technica25)
+- [Technica Hackathon](https://gotechnica.org/)
+
+---
+
+**Note**: This project uses the React + Vite template with HMR (Hot Module Replacement) and ESLint rules for optimal development experience.

@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const location = useLocation();
@@ -12,6 +13,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
+          <img src={logo} alt="Decisionera Logo" className="nav-logo-img" />
           Decisionera
         </Link>
         
