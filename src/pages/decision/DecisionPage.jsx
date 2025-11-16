@@ -253,20 +253,22 @@ export default function DecisionPage() {
   /* -------------------------------------------------------
         RATE OPTIONS
   -------------------------------------------------------*/
-  const renderRatingsStep = () => (
-    <div className="chat-section-bubble">
-      <h3>Rate Each Category</h3>
-      <p className="helper-text">Rate each option from 1–5</p>
+  const renderRatingsStep = () => {
+    console.log("🎯 Rendering ratings step with options:", options);
+    return (
+      <div className="chat-section-bubble">
+        <h3>Rate Each Category</h3>
+        <p className="helper-text">Rate each option from 1–5</p>
 
-      <div className="ratings-table">
-        <div className="ratings-header">
-          <span></span>
-          {options.map((opt) => (
-            <span key={opt} className="ratings-option-col">
-              {opt}
-            </span>
-          ))}
-        </div>
+        <div className="ratings-table">
+          <div className="ratings-header">
+            <span></span>
+            {options.map((opt) => (
+              <span key={opt} className="ratings-option-col">
+                {opt}
+              </span>
+            ))}
+          </div>
 
         {categories.map((cat) => (
           <div key={cat} className="ratings-row">
@@ -315,6 +317,7 @@ export default function DecisionPage() {
 
           // Save decision to Firebase
           if (currentUser) {
+            console.log("💾 Saving decision to Firebase for user:", currentUser.uid);
             const decisionData = {
               question: decision,
               options: options,
@@ -326,7 +329,20 @@ export default function DecisionPage() {
               overallScore: bestScore
             };
 
-            await saveDecision(currentUser.uid, decisionData);
+            console.log("📊 Decision data:", decisionData);
+
+            try {
+              const decisionId = await saveDecision(currentUser.uid, decisionData);
+              if (decisionId) {
+                console.log("✅ Decision saved successfully with ID:", decisionId);
+              } else {
+                console.error("❌ Failed to save decision");
+              }
+            } catch (error) {
+              console.error("❌ Error saving decision:", error);
+            }
+          } else {
+            console.warn("⚠️ No user logged in, decision not saved");
           }
 
           setTimeout(() => {
@@ -346,7 +362,8 @@ export default function DecisionPage() {
         Ready to continue
       </button>
     </div>
-  );
+    );
+  };
 
   /* -------------------------------------------------------
         RESULTS
