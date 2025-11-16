@@ -1,243 +1,315 @@
 .journal-page {
   min-height: calc(100vh - 80px);
   background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-  padding: 3rem 5%;
+  padding: 2rem 3%;
   width: 100%;
 }
 
-.journal-container {
+.journal-layout {
   width: 100%;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.journal-header {
-  text-align: center;
-  margin-bottom: 2rem;
+.calendar-section {
+  /* background: linear-gradient(135deg, rgba(255, 182, 193, 0.3) 0%, rgba(173, 216, 230, 0.3) 25%, rgba(255, 218, 185, 0.3) 50%, rgba(221, 160, 221, 0.3) 75%, rgba(255, 182, 193, 0.3) 100%); */
+  padding: 1rem; /* compact padding */
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center; /* vertically center arrows and grid */
+  gap: 0.75rem; /* tighter spacing */
+  width: 100%;
 }
 
-.journal-header h1 {
-  color: #667eea;
-  margin-bottom: 0.5rem;
-}
-
-.journal-header p {
-  color: #6c757d;
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.new-entry-button {
-  padding: 0.75rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.new-entry-button:hover {
-  transform: scale(1.05);
-}
-
-.new-entry-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.entry-input {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.entry-input:focus {
-  border-color: #667eea;
-}
-
-.entry-textarea {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-family: inherit;
-  margin-bottom: 1rem;
-  outline: none;
-  resize: vertical;
-  transition: border-color 0.3s ease;
-  line-height: 1.6;
-}
-
-.entry-textarea:focus {
-  border-color: #667eea;
-}
-
-.entry-meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.mood-input,
-.tags-input {
-  flex: 1;
-  padding: 0.75rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.mood-input:focus,
-.tags-input:focus {
-  border-color: #667eea;
-}
-
-.save-entry-button {
-  width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.save-entry-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.entries-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.empty-state {
-  background: white;
-  padding: 3rem;
-  border-radius: 16px;
-  text-align: center;
-  color: #6c757d;
-}
-
-.entry-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.entry-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-}
-
-.entry-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.entry-header h3 {
-  color: #212529;
+.calendar-header h2 {
+  color: #667eea;
+  font-size: 1.8rem;
   margin: 0;
 }
 
-.entry-date {
-  color: #6c757d;
-  font-size: 0.9rem;
-}
-
-.entry-content {
-  color: #495057;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.entry-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.mood-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.tags {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.tag {
+.week-nav {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #667eea;
   color: #667eea;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 1.5rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+} 
+
+.month-nav:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
 }
 
-.journal-cta {
-  margin-top: 3rem;
-  text-align: center;
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+.calendar-grid {
+  display: grid; /* restore 7-column grid */
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem; /* compact gap */
+  flex: 1;          
+  min-width: 0;     
 }
 
-.journal-cta p {
-  color: #6c757d;
-  margin-bottom: 1rem;
+.calendar-day {
+  aspect-ratio: 1; /* compact cells */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  min-height: 60px; /* was 80px */
+  padding: 0.35rem; /* was 0.5rem */
 }
 
-.cta-button {
-  display: inline-block;
-  padding: 0.75rem 2rem;
+.calendar-day:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: #667eea;
+}
+
+.calendar-day.today {
+  border: 3px solid #667eea;
+  font-weight: bold;
+}
+
+.calendar-day.selected {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  text-decoration: none;
-  border-radius: 24px;
-  font-weight: 600;
-  transition: transform 0.2s ease;
-}
-
-.cta-button:hover {
   transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* Responsive */
+.calendar-day.has-entry {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+}
+
+.day-label-text {
+  font-size: 0.65rem; /* slightly smaller */
+  font-weight: 600;
+  line-height: 1.1;
+  color: #495057;
+  align-self: flex-start;
+}
+
+.calendar-day.selected .day-label-text {
+  color: white;
+}
+
+.day-mood-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.calendar-day.selected .day-mood-icon svg circle:first-child {
+  fill: rgba(255, 255, 255, 0.3);
+  background: #667eea;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 6px;
+}
+
+.calendar-day.selected .entry-indicator {
+  background: white;
+}
+
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 1.5rem;
+  min-height: 600px;
+}
+
+.left-panel {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.journal-entry-area {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.entry-placeholder h3 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.entry-placeholder > p {
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+.placeholder-box {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #667eea;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.placeholder-box p {
+  font-size: 1.2rem;
+  color: #667eea;
+  margin: 0;
+}
+
+.placeholder-note {
+  font-size: 0.9rem !important;
+  color: #6c757d !important;
+  font-style: italic;
+}
+
+.right-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.right-panel h3 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.mood-highlighters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mood-highlighter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.6rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  background: #f8f9fa;
+}
+
+.mood-highlighter:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateX(5px);
+  border-color: var(--mood-color);
+}
+
+.mood-highlighter.selected {
+  background: var(--mood-color);
+  transform: translateX(8px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+}
+
+.mood-highlighter.selected .mood-label {
+  color: white;
+  font-weight: bold;
+}
+
+.mood-highlighter.noface-mood.selected .mood-label {
+  color: black;
+}
+
+.mood-highlighter svg {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.mood-highlighter:hover svg {
+  transform: scale(1.1);
+}
+
+.mood-highlighter.selected svg {
+  filter: brightness(1.2);
+}
+
+.mood-label {
+  flex: 1;
+  color: #495057;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+  .content-wrapper {
+    grid-template-columns: 150px 1fr 200px;
+  }
+}
+
 @media (max-width: 768px) {
   .journal-page {
-    padding: 1rem 3%;
+    padding: 1rem 2%;
   }
-  
-  .entry-meta {
-    flex-direction: column;
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .left-panel {
+    display: none;
+  }
+  .right-panel {
+    order: -1;
+  }
+  .mood-highlighters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .mood-highlighter {
+    flex: 0 0 calc(50% - 0.25rem);
+    justify-content: center;
+  }
+  .calendar-grid {
+    gap: 0.25rem;
+  }
+  .calendar-day {
+    min-height: 50px;
+    font-size: 0.9rem;
   }
 }

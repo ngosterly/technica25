@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-#Env variables
+# Env
 .env
 .venv
+venv
