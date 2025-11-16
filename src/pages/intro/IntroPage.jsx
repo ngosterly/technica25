@@ -12,9 +12,12 @@ import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import PetsIcon from '@mui/icons-material/Pets';
 import MoodIcon from '@mui/icons-material/Mood';
+import InstagramIcon from '@mui/icons-material/Instagram';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { IconButton } from '@mui/material';
+import teamPhoto from '../../assets/us.JPG';
 
 const IntroPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -101,36 +104,56 @@ const IntroPage = () => {
       {/* about us section */}
       <section className="about-section">
         <div className="container">
-          <h2>About Us</h2>
-          <p className="about-text">
-            Decisionera was created at Technica 2025, the world's largest all-women and non-binary hackathon. 
-            We understand that decision-making can be particularly challenging for those managing mental health concerns. 
-            We believe that technology should empower, not overwhelm.
-          </p>
+          <h2 style={{ textAlign: 'center' }}>About Us</h2>
           
-          <div className="principles">
-            <div className="principle">
-              <h4>Safe Language</h4>
-              <p>
-                We carefully avoid words with negative connotations like "failure" or
-                "bad choice," focusing instead on growth and learning.
+          <div className="about-content-wrapper">
+            <div className="about-left">
+              <p className="about-text">
+                Decisionera was created at Technica 2025, the world's largest all-women and non-binary hackathon. 
+                We understand that decision-making can be particularly challenging for those managing mental health concerns. 
+                We believe that technology should empower, not overwhelm.
               </p>
+              
+              <div className="principles-grid">
+                <div className="principle-card">
+                  <h4>Safe Language</h4>
+                  <p>
+                    We carefully avoid words with negative connotations like "failure" or
+                    "bad choice," focusing instead on growth and learning.
+                  </p>
+                </div>
+                
+                <div className="principle-card">
+                  <h4>User Control</h4>
+                  <p>
+                    You're in charge. See why AI generates certain categories and remove
+                    any that don't serve you.
+                  </p>
+                </div>
+                
+                <div className="principle-card">
+                  <h4>Mood Tracking & Insights</h4>
+                  <p>
+                    Track your daily moods with our intuitive mood tracker. Visualize emotional patterns 
+                    over time and understand how your feelings influence your decision-making process.
+                  </p>
+                </div>
+                
+                <div className="principle-card hackathon-card">
+                  <div className="hackathon-icon">
+                    <EmojiEventsIcon sx={{ fontSize: 40, color: '#6b6ad7e2' }} />
+                  </div>
+                  <h4>Our First Hackathon!</h4>
+                  <p>
+                    Built with passion and dedication at Technica 2025, our debut project represents 
+                    our commitment to meaningful innovation.
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <div className="principle">
-              <h4>User Control</h4>
-              <p>
-                You're in charge. See why AI generates certain categories and remove
-                any that don't serve you.
-              </p>
-            </div>
-            
-            <div className="principle">
-              <h4>Mood Tracking & Insights</h4>
-              <p>
-                Track your daily moods with our intuitive mood tracker. Visualize emotional patterns 
-                over time and understand how your feelings influence your decision-making process.
-              </p>
+            <div className="about-right">
+              <img src={teamPhoto} alt="Team at Technica 2025" className="team-photo" />
             </div>
           </div>
         </div>
@@ -185,8 +208,8 @@ const IntroPage = () => {
                 Building UI components and systems that prioritize accessibility and mental health support.
               </p>
               <div className="member-links">
-                <a href="https://www.linkedin.com/in/tommy-brozek" target="_blank" rel="noopener noreferrer">
-                  <LinkedInIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
+                <a href="https://www.instagram.com/tommybrozek?igsh=cWxxbmxrZGgxbGhv" target="_blank" rel="noopener noreferrer">
+                  <InstagramIcon sx={{ fontSize: 24, color: '#6b6ad7e2' }} />
                 </a>
               </div>
             </div>
@@ -220,8 +243,6 @@ const IntroPage = () => {
             <Link to="/journal" className="cta-button-secondary">
               Start Journaling
             </Link>
-          </div>
-          <div className="github-section">
             <a 
               href="https://github.com/ngosterly/technica25" 
               target="_blank" 
@@ -232,6 +253,9 @@ const IntroPage = () => {
               View on GitHub
             </a>
           </div>
+          {/* <div className="github-section">
+            
+          </div> */}
         </div>
       </section>
 

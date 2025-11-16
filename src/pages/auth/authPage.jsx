@@ -9,6 +9,9 @@ import {
 } from 'firebase/auth';
 import { auth } from '../../contexts/AuthContext';
 import logo from '../../assets/logo.png';
+import googleIcon from '../../assets/google.png';
+import ghostImg from '../../assets/ghost.png';
+import flowerImg from '../../assets/flower.png';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -18,15 +21,61 @@ export default function AuthPage() {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
 
-  // Add placeholder styling
   const placeholderStyle = `
     .auth-input::placeholder {
       color: #999;
       opacity: 1;
     }
+    
+    @keyframes ghostFlyIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-200px) translateY(-100px) scale(0.3);
+      }
+      60% {
+        opacity: 1;
+        transform: translateX(10px) translateY(-50%) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) translateY(-50%) scale(1);
+      }
+    }
+    
+    @keyframes ghostFloat {
+      0%, 100% {
+        transform: translateY(-50%) scale(1);
+      }
+      50% {
+        transform: translateY(calc(-50% - 20px)) scale(1.02);
+      }
+    }
+    
+    @keyframes flowerFlyIn {
+      0% {
+        opacity: 0;
+        transform: translateX(200px) translateY(-100px) scale(0.3);
+      }
+      60% {
+        opacity: 1;
+        transform: translateX(-10px) translateY(-50%) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) translateY(-50%) scale(1);
+      }
+    }
+    
+    @keyframes flowerFloat {
+      0%, 100% {
+        transform: translateY(-50%) scale(1);
+      }
+      50% {
+        transform: translateY(calc(-50% + 20px)) scale(1.02);
+      }
+    }
   `;
 
-  // Handle Email Login
   const handleEmailLogin = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -42,7 +91,6 @@ export default function AuthPage() {
     }
   };
 
-  // Handle Email Registration
   const handleEmailRegister = async () => {
     if (registerData.password.length < 6) {
       alert('Password must be at least 6 characters long');
@@ -56,7 +104,6 @@ export default function AuthPage() {
         registerData.password
       );
 
-      // Update user profile with display name
       await updateProfile(userCredential.user, {
         displayName: registerData.name
       });
@@ -69,7 +116,6 @@ export default function AuthPage() {
     }
   };
 
-  // Handle Google Sign-In
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -84,6 +130,8 @@ export default function AuthPage() {
   return (
     <div style={styles.body}>
       <style>{placeholderStyle}</style>
+      <img src={ghostImg} alt="Ghost" style={styles.ghostDecoration} />
+      <img src={flowerImg} alt="Flower" style={styles.flowerDecoration} />
       <div style={styles.container}>
         <div style={styles.authBox}>
           <div style={styles.logoSection}>
@@ -91,7 +139,6 @@ export default function AuthPage() {
           </div>
 
           {isLogin ? (
-            // Login Form
             <div style={styles.formContainer}>
               <h2 style={styles.title}>Welcome Back</h2>
               <p style={styles.subtitle}>Sign in to continue</p>
@@ -129,7 +176,7 @@ export default function AuthPage() {
               </div>
 
               <button onClick={handleGoogleSignIn} style={styles.btnGoogle}>
-                <span style={styles.googleIcon}></span>
+                <img src={googleIcon} alt="Google" style={{width: '20px', height: '20px', marginRight: '8px'}} />
                 Continue with Google
               </button>
 
@@ -141,7 +188,6 @@ export default function AuthPage() {
               </p>
             </div>
           ) : (
-            // Register Form
             <div style={styles.formContainer}>
               <h2 style={styles.title}>Create Account</h2>
               <p style={styles.subtitle}>Join us today</p>
@@ -188,7 +234,7 @@ export default function AuthPage() {
               </div>
 
               <button onClick={handleGoogleSignIn} style={styles.btnGoogle}>
-                <span style={styles.googleIcon}></span>
+                <img src={googleIcon} alt="Google" style={{width: '20px', height: '20px', marginRight: '8px'}} />
                 Sign up with Google
               </button>
 
@@ -351,5 +397,29 @@ const styles = {
     textDecoration: 'none',
     fontWeight: '600',
     cursor: 'pointer',
+  },
+  ghostDecoration: {
+    position: 'fixed',
+    left: '5%',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: '180px',
+    height: 'auto',
+    opacity: 0,
+    animation: 'ghostFlyIn 1.5s ease-out forwards, ghostFloat 3s ease-in-out 1.5s infinite',
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  flowerDecoration: {
+    position: 'fixed',
+    right: '5%',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: '180px',
+    height: 'auto',
+    opacity: 0,
+    animation: 'flowerFlyIn 1.5s ease-out 0.3s forwards, flowerFloat 3s ease-in-out 1.8s infinite',
+    zIndex: 1,
+    pointerEvents: 'none',
   },
 };
