@@ -55,7 +55,7 @@ const JournalPage = () => {
   useEffect(() => {
     loadAllEntries();
     
-    // Check if a date is specified in URL params
+    // check if a date is specified in URL params
     const dateParam = searchParams.get('date');
     if (dateParam) {
       const entry = getEntryByDate(dateParam);
@@ -63,19 +63,17 @@ const JournalPage = () => {
         setSelectedEntry({ date: dateParam, ...entry });
         setJournalText(entry.text || '');
       } else {
-        // Create new entry for this date
         setCurrentDate(dateParam);
         setSelectedEntry({ date: dateParam });
         setEditMode(true);
       }
-      // Clear the URL parameter
       setSearchParams({});
     }
   }, [searchParams, setSearchParams, currentWeekStart]);
 
   const loadAllEntries = () => {
     const entriesMap = getAllEntries();
-    // Convert to array and sort by date (newest first)
+    // convert to array and sort by date (newest first)
     const entriesArray = Object.entries(entriesMap)
       .map(([date, data]) => ({ date, ...data }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -86,14 +84,14 @@ const JournalPage = () => {
     const weekEnd = new Date(currentWeekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
     
-    // Create all 7 days of the week, even if no entry exists
+    // create all 7 days of the week, even if no entry exists
     const weekDays = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(currentWeekStart);
       date.setDate(date.getDate() + i);
       const dateKey = date.toISOString().split('T')[0];
       
-      // Find existing entry for this date
+      // find an existing entry for this date
       const existingEntry = entries.find(entry => entry.date === dateKey);
       
       weekDays.push({
@@ -147,7 +145,7 @@ const JournalPage = () => {
     loadAllEntries();
     setEditMode(false);
     
-    // Update selected entry
+    // updating selected entry
     const updatedEntry = getEntryByDate(currentDate);
     setSelectedEntry({ date: currentDate, ...updatedEntry });
   };
@@ -215,7 +213,7 @@ const JournalPage = () => {
               sx={{
                 width: '100%',
                 backgroundColor: 'white',
-                color: '#667eea',
+                color: '#6b6ad7e2',
                 '&:hover': {
                   backgroundColor: '#f8f9fa'
                 }
@@ -226,13 +224,13 @@ const JournalPage = () => {
           </div>
 
           <div className="week-navigation">
-            <IconButton onClick={handlePrevWeek} size="small" sx={{ color: '#667eea' }}>
+            <IconButton onClick={handlePrevWeek} size="small" sx={{ color: '#6b6ad7e2' }}>
               <ChevronLeft />
             </IconButton>
-            <IconButton onClick={handleToday} size="small" sx={{ color: '#667eea' }}>
+            <IconButton onClick={handleToday} size="small" sx={{ color: '#6b6ad7e2' }}>
               <Today />
             </IconButton>
-            <IconButton onClick={handleNextWeek} size="small" sx={{ color: '#667eea' }}>
+            <IconButton onClick={handleNextWeek} size="small" sx={{ color: '#6b6ad7e2' }}>
               <ChevronRight />
             </IconButton>
           </div>
@@ -279,47 +277,54 @@ const JournalPage = () => {
 
         <div className="journal-content">
           {selectedEntry ? (
-            <div className={`entry-display journal-page-container ${isFlipping ? 'flipping' : ''}`}>
-              <div className="journal-entry-paper">
-                <div className="journal-page-lines"></div>
-                <div className="entry-header">
-                  <h1>{formatDisplayDate(selectedEntry.date)}</h1>
-                  {!editMode && (
-                    <IconButton onClick={() => setEditMode(true)} sx={{ color: '#667eea' }}>
-                      <Edit />
-                    </IconButton>
+            <div className={`flip-card ${isFlipping ? 'flipped' : ''}`}>
+              <div className="flip-card-inner">
+                {/* Front side - Journal entry */}
+                <div className="flip-card-front journal-entry-paper">
+                  <div className="journal-page-lines"></div>
+                  <div className="entry-header">
+                    <h1>{formatDisplayDate(selectedEntry.date)}</h1>
+                    {!editMode && (
+                      <IconButton onClick={() => setEditMode(true)} sx={{ color: '#6b6ad7e2' }}>
+                        <Edit />
+                      </IconButton>
+                    )}
+                  </div>
+
+                  {editMode ? (
+                    <div className="edit-mode">
+                      <textarea
+                        className="journal-textarea"
+                        value={journalText}
+                        onChange={(e) => setJournalText(e.target.value)}
+                        placeholder="Write your thoughts here..."
+                        autoFocus
+                      />
+                      <div className="edit-actions">
+                        <IconButton onClick={handleSaveEntry} sx={{ color: '#000' }}>
+                          <Save />
+                        </IconButton>
+                        <IconButton onClick={handleCancelEdit} sx={{ color: '#757575' }}>
+                          <Close />
+                        </IconButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="entry-text">
+                      {selectedEntry.text || 'No content yet. Click "Edit" to add some!'}
+                    </div>
+                  )}
+
+                  {selectedEntry.updatedAt && (
+                    <div className="entry-meta">
+                      Last updated: {new Date(selectedEntry.updatedAt).toLocaleString()}
+                    </div>
                   )}
                 </div>
 
-                {editMode ? (
-                  <div className="edit-mode">
-                    <textarea
-                      className="journal-textarea"
-                      value={journalText}
-                      onChange={(e) => setJournalText(e.target.value)}
-                      placeholder="Write your thoughts here..."
-                      autoFocus
-                    />
-                    <div className="edit-actions">
-                      <IconButton onClick={handleSaveEntry} sx={{ color: '#000' }}>
-                        <Save />
-                      </IconButton>
-                      <IconButton onClick={handleCancelEdit} sx={{ color: '#757575' }}>
-                        <Close />
-                      </IconButton>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="entry-text">
-                    {selectedEntry.text || 'No content yet. Click "Edit" to add some!'}
-                  </div>
-                )}
-
-                {selectedEntry.updatedAt && (
-                  <div className="entry-meta">
-                    Last updated: {new Date(selectedEntry.updatedAt).toLocaleString()}
-                  </div>
-                )}
+                <div className="flip-card-back">
+                  <h1>{formatDisplayDate(selectedEntry.date)}</h1>
+                </div>
               </div>
             </div>
           ) : (
@@ -333,7 +338,7 @@ const JournalPage = () => {
                   onClick={handleNewEntry}
                   size="large"
                   sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #ffc4df 0%, #a2b4f5 100%)',
                     color: 'white',
                     padding: '1rem 2rem',
                     borderRadius: '16px',

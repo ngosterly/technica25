@@ -24,7 +24,7 @@
 }
 
 .chatbot-header h1 {
-  color: #667eea;
+  color: #6b6ad7e2;
   margin-bottom: 0.5rem;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .message.user .message-bubble {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ffc4df 0%, #a2b4f5 100%);
   color: white;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .categories-section h3 {
-  color: #667eea;
+  color: #6b6ad7e2;
   margin-bottom: 1rem;
 }
 
@@ -98,15 +98,15 @@
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
-  border: 2px solid #667eea;
-  color: #667eea;
+  border: 2px solid #ffc4df;
+  color: #6b6ad7e2;
   font-weight: 500;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .category-card:hover {
-  background: #667eea;
+  background: #ffc4df;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -153,12 +153,12 @@
 }
 
 .chat-input:focus {
-  border-color: #667eea;
+  border-color: #6b6ad7e2;
 }
 
 .send-button {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ffc4df 0%, #a2b4f5 100%);
   color: white;
   border: none;
   border-radius: 24px;
@@ -186,12 +186,12 @@
 }
 
 .messages-container::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background: #ffc4df;
   border-radius: 4px;
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
-  background: #764ba2;
+  background: #a2b4f5;
 }
 
 /* Responsive */

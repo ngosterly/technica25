@@ -151,11 +151,11 @@ const CalendarPage = () => {
     <div className="calendar-page">
       <div className="calendar-container">
         <div className="calendar-header">
-          <IconButton onClick={handlePrevMonth} sx={{ color: '#667eea' }}>
+          <IconButton onClick={handlePrevMonth} sx={{ color: '#6b6ad7e2' }}>
             <ChevronLeft />
           </IconButton>
           <h2>{monthYear}</h2>
-          <IconButton onClick={handleNextMonth} sx={{ color: '#667eea' }}>
+          <IconButton onClick={handleNextMonth} sx={{ color: '#6b6ad7e2' }}>
             <ChevronRight />
           </IconButton>
         </div>
@@ -171,13 +171,13 @@ const CalendarPage = () => {
               size="small"
               sx={{
                 '& .MuiToggleButton-root': {
-                  color: '#667eea',
-                  borderColor: '#667eea',
+                  color: '#6b6ad7e2',
+                  borderColor: '#ffc4df',
                   '&.Mui-selected': {
-                    backgroundColor: '#667eea',
+                    backgroundColor: '#ffc4df',
                     color: 'white',
                     '&:hover': {
-                      backgroundColor: '#764ba2',
+                      backgroundColor: '#a2b4f5',
                     }
                   }
                 }
@@ -244,12 +244,12 @@ const CalendarPage = () => {
                   {/* indicators per day */}
                   <div className="day-indicators">
                     {hasJournal && (
-                      <IconButton size="small" sx={{ padding: '2px', color: '#667eea' }}>
+                      <IconButton size="small" sx={{ padding: '2px', color: '#6b6ad7e2' }}>
                         <MenuBook fontSize="medium" />
                       </IconButton>
                     )}
                     {hasDecision && (
-                      <IconButton size="small" sx={{ padding: '2px', color: '#764ba2' }}>
+                      <IconButton size="small" sx={{ padding: '2px', color: '#a2b4f5' }}>
                         <LightbulbOutlined fontSize="medium" />
                       </IconButton>
                     )}

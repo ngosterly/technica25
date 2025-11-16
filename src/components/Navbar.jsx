@@ -8,18 +8,6 @@ const Navbar = () => {
     return location.pathname === path ? 'nav-link active' : 'nav-link';
   };
 
-  const scrollToAbout = (e) => {
-    if (location.pathname !== '/') {
-      return;
-    }
-    // scroll to about section on intropage
-    e.preventDefault();
-    const aboutSection = document.getElementById('about-section');
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <nav className="navbar">
       <div className="nav-container">
@@ -50,22 +38,6 @@ const Navbar = () => {
             <Link to="/calendar" className={isActive('/calendar')}>
               Calendar
             </Link>
-          </li>
-          
-          <li className="nav-item">
-            {location.pathname === '/' ? (
-              <a 
-                href="#about-section" 
-                className="nav-link"
-                onClick={scrollToAbout}
-              >
-                About
-              </a>
-            ) : (
-              <Link to="/#about-section" className="nav-link">
-                About
-              </Link>
-            )}
           </li>
         </ul>
       </div>

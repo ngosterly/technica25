@@ -24,7 +24,7 @@
 }
 
 .calendar-header h2 {
-  color: #667eea;
+  color: #6b6ad7e2;
   font-size: 1.8rem;
   margin: 0;
   font-family: 'M PLUS Rounded 1c', sans-serif;
@@ -32,8 +32,8 @@
 
 .month-nav {
   background: rgba(255, 255, 255, 0.8);
-  border: 2px solid #667eea;
-  color: #667eea;
+  border: 2px solid #ffc4df;
+  color: #6b6ad7e2;
   font-size: 1.5rem;
   width: 50px;
   height: 50px;
@@ -44,7 +44,7 @@
 }
 
 .month-nav:hover {
-  background: #667eea;
+  background: #ffc4df;
   color: white;
   transform: scale(1.1);
 }
@@ -67,7 +67,7 @@
 }
 
 .mood-statistics h3 {
-  color: #667eea;
+  color: #6b6ad7e2;
   margin: 0;
   font-family: 'M PLUS Rounded 1c', sans-serif;
 }
@@ -102,7 +102,7 @@
 
 .mood-stat-percentage {
   font-weight: 700;
-  color: #667eea;
+  color: #6b6ad7e2;
   font-size: 1.1rem;
 }
 
@@ -125,7 +125,7 @@
 .weekday-label {
   text-align: center;
   font-weight: 700;
-  color: #667eea;
+  color: #6b6ad7e2;
   padding: 0.5rem;
   font-size: 0.9rem;
 }
@@ -160,11 +160,11 @@
   background: rgba(255, 255, 255, 0.9);
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  border-color: #667eea;
+  border-color: #6b6ad7e2;
 }
 
 .calendar-day.today {
-  border: 3px solid #667eea;
+  border: 3px solid #ffc4df;
   font-weight: bold;
   background: rgba(102, 126, 234, 0.05);
 }
@@ -263,7 +263,7 @@
 
 .modal-header h3 {
   margin: 0;
-  color: #667eea;
+  color: #6b6ad7e2;
   font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
@@ -285,7 +285,7 @@
 
 .modal-close:hover {
   background: #f8f9fa;
-  color: #667eea;
+  color: #6b6ad7e2;
 }
 
 .modal-body {
@@ -302,7 +302,7 @@
 
 .action-button {
   padding: 1rem;
-  border: 2px solid #667eea;
+  border: 2px solid #ffc4df;
   background: white;
   border-radius: 12px;
   font-size: 1.1rem;
@@ -317,7 +317,7 @@
 }
 
 .action-button:hover {
-  background: #667eea;
+  background: #ffc4df;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -327,7 +327,7 @@
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #ffc4df;
   color: #333;
 }
 
@@ -362,7 +362,7 @@
 
 .mood-selector-header h3 {
   margin: 0;
-  color: #667eea;
+  color: #6b6ad7e2;
   font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 1.3rem;
 }
